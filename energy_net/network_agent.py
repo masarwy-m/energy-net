@@ -1,0 +1,2 @@
+class NetworkAgent:
+    pass

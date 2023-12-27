@@ -1,0 +1,2 @@
+class NetworkEntity:
+    pass
