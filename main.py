@@ -1,9 +1,12 @@
-from energy_net.network_entity import ElementaryNetworkEntity, MarketProducer
+from energy_net.network_entity import ElementaryNetworkEntity, MarketProducer, CompositeNetworkEntity
 from energy_net.dynamics.energy_dynamcis import EnergyDynamics, ProductionDynamics
 from energy_net.network_manager import NetworkManager
 
 
 class DummyStationDynamics(ProductionDynamics):
+    def __init__(self, production_capacity):
+        self.production_capacity = production_capacity
+
     def do(self, action, params, cur_state):
         if action == "produce":
             return min(params['amount'], self.production_capacity)
@@ -43,32 +46,62 @@ class DummyConsumerDynamics(EnergyDynamics):
             raise NotImplemented('consumers can only consume')
 
 
+def test_elementary_network_market():
+    station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
+    station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
+    station3 = DummyProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
+    station4 = DummyProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
+    station5 = DummyProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
 
-station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
-station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
-station3 = DummyProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
-station4 = DummyProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
-station5 = DummyProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
-
-consumer1 = ElementaryNetworkEntity('consumer1', DummyConsumerDynamics(fixed_consumption=2))
-consumer2 = ElementaryNetworkEntity('consumer2', DummyConsumerDynamics(fixed_consumption=4))
-consumer3 = ElementaryNetworkEntity('consumer3', DummyConsumerDynamics(fixed_consumption=6))
-consumer4 = ElementaryNetworkEntity('consumer4', DummyConsumerDynamics(fixed_consumption=8))
-
-
-mgr = NetworkManager([station1, station2, station3, station4, station5],
-                     [consumer1, consumer2, consumer3, consumer4])
-
-demand = mgr.collect_demand(None)
-bids = mgr.collect_bids(None, demand)
-workloads, price = mgr.market_clearing(demand, bids)
-
-print(f'demand was: {demand}')
-print(f'bids were: {bids}')
-print(f'workloads are: {workloads}')
-print(f'final price is: {price}')
+    consumer1 = ElementaryNetworkEntity('consumer1', DummyConsumerDynamics(fixed_consumption=2))
+    consumer2 = ElementaryNetworkEntity('consumer2', DummyConsumerDynamics(fixed_consumption=4))
+    consumer3 = ElementaryNetworkEntity('consumer3', DummyConsumerDynamics(fixed_consumption=6))
+    consumer4 = ElementaryNetworkEntity('consumer4', DummyConsumerDynamics(fixed_consumption=8))
 
 
+    mgr = NetworkManager([station1, station2, station3, station4, station5],
+                         [consumer1, consumer2, consumer3, consumer4])
+
+    demand = mgr.collect_demand(None)
+    bids = mgr.collect_bids(None, demand)
+    workloads, price = mgr.market_clearing(demand, bids)
+
+    print(f'demand was: {demand}')
+    print(f'bids were: {bids}')
+    print(f'workloads are: {workloads}')
+    print(f'final price is: {price}')
+
+
+def test_composite_network_market():
+    station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
+    station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
+    station3 = DummyProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
+    station4 = DummyProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
+    station5 = DummyProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
+
+    consumer1 = ElementaryNetworkEntity('consumer1', DummyConsumerDynamics(fixed_consumption=2))
+    consumer2 = ElementaryNetworkEntity('consumer2', DummyConsumerDynamics(fixed_consumption=4))
+    consumer3 = ElementaryNetworkEntity('consumer3', DummyConsumerDynamics(fixed_consumption=6))
+    consumer4 = ElementaryNetworkEntity('consumer4', DummyConsumerDynamics(fixed_consumption=8))
+
+    # this is the key difference from the elementary implementation
+    consumer_aggregator = CompositeNetworkEntity('agg1',[consumer1, consumer2, consumer3, consumer4], sum)
+    mgr = NetworkManager([station1, station2, station3, station4, station5],
+                         [consumer_aggregator])
+
+    demand = mgr.collect_demand(None)
+    bids = mgr.collect_bids(None, demand)
+    workloads, price = mgr.market_clearing(demand, bids)
+
+    print(f'demand was: {demand}')
+    print(f'bids were: {bids}')
+    print(f'workloads are: {workloads}')
+    print(f'final price is: {price}')
+
+
+if __name__ == "__main__":
+    test_elementary_network_market()
+    #test_composite_network_market()
 
 #############################
 
