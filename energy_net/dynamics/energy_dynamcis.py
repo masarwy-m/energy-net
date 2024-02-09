@@ -20,6 +20,9 @@ class EnergyDynamics():
 class ProductionDynamics(EnergyDynamics):
     pass
 
+class ConsumptionDynamics(EnergyDynamics):
+    pass
+
 class StorageDynamics(EnergyDynamics):
     @abstractmethod
     def get_current_discharge_capability(self):
@@ -36,3 +39,7 @@ class StorageDynamics(EnergyDynamics):
     @abstractmethod
     def predict_charge_capability(self, state):
         pass
+
+
+class TransmissionDynamics(EnergyDynamics):
+    pass

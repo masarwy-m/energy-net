@@ -1,19 +1,20 @@
 class NetworkManager:
-    def __init__(self, producers, consumers):
-        self.producers = producers
-        self.consumers = consumers
+    def __init__(self, grid_agents):
+        self.grid_agents = grid_agents
 
     def collect_demand(self, state):
         total_consumption = 0
-        for consumer in self.consumers:
-            total_consumption += consumer.predict({'consume': {}}, state)['consume']
+        for ga in self.grid_agents:
+            total_consumption += ga.predict({'consume': {}}, state)['consume']
 
         return total_consumption
 
-    def collect_bids(self, state, consumption_demand):
+    def collect_production_bids(self, state, demand):
         bids = {}
-        for producer in self.producers:
-            bids[producer.name] = producer.production_bid(state, consumption_demand)
+        for ga in self.grid_agents:
+            bid = ga.get_bid('production',state, demand)
+            if bid:
+                bids[ga.name] = bid
 
         return bids
 

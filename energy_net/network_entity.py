@@ -16,7 +16,7 @@ class NetworkEntity:
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state) -> [State,Reward]:
+    def predict(self, action: EnergyAction, state: State) -> [State,Reward]:
         pass
 
 
@@ -54,14 +54,27 @@ class ElementaryNetworkEntity(NetworkEntity):
 
         return out
 
+class MarketEntity(ElementaryNetworkEntity):
 
-class MarketProducer(ElementaryNetworkEntity):
+    @abstractmethod
+    def get_bid(self, bid_type, state, args):
+        pass
+
+class CompositeMarketEntity(CompositeNetworkEntity):
+
+    @abstractmethod
+    def get_bid(self, bid_type, state, args):
+        pass
+
+
+class MarketProducer(MarketEntity):
 
     def __init__(self, name, energy_dynamics: ProductionDynamics):
         super().__init__(name, energy_dynamics)
 
-    @abstractmethod
-    def production_bid(self, state, consumption_demand):
-        pass
 
+class MarketConsumer(MarketEntity):
+
+    def __init__(self, name, energy_dynamics: ProductionDynamics):
+        super().__init__(name, energy_dynamics)
 

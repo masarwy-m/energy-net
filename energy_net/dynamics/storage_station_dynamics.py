@@ -5,7 +5,7 @@ class StorageStationDynamics(StorageDynamics):
         self.dc_capacity = dc_capacity
         self.net_connection_size = net_connection_size
         self.efficiency = efficiency
-        self.capacity = capacity
+        self.kibolet = capacity
 
         self.soc = 0
 
