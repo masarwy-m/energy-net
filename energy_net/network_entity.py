@@ -1,14 +1,9 @@
 from abc import abstractmethod
-from energy_net.dynamics.energy_dynamcis import EnergyDynamics, ProductionDynamics
+from energy_net.dynamics.energy_dynamcis import EnergyDynamics
 from energy_net.utils import AggFunc
-
-from typing import Callable, Any
-EnergyAction = dict[str, Any]
-State = dict[str, Any]
-Reward = dict[str, float]
-
+from energy_net.defs import EnergyAction, State, Reward
 class NetworkEntity:
-    def __init__(self, name):
+    def __init__(self, name: str):
         self.name = name
 
     @abstractmethod
@@ -21,7 +16,7 @@ class NetworkEntity:
 
 
 class CompositeNetworkEntity(NetworkEntity):
-    def __init__(self, name, sub_entities, agg_func:AggFunc):
+    def __init__(self, name: str, sub_entities:list[NetworkEntity], agg_func:AggFunc):
         super().__init__(name)
         self.sub_entities = sub_entities
         self.agg_func = agg_func
@@ -29,15 +24,14 @@ class CompositeNetworkEntity(NetworkEntity):
     def step(self, action: EnergyAction) -> [State, Reward]:
         return self.agg_func([entity.step(action) for entity in self.sub_entities])
 
-    def predict(self, action: EnergyAction, state):
+    def predict(self, action: EnergyAction, state: State):
         predictions = [entity.predict(action, state) for entity in self.sub_entities]
         return self.agg_func(predictions)
 
 
 class ElementaryNetworkEntity(NetworkEntity):
-    def __init__(self, name, energy_dynamics):
+    def __init__(self, name, energy_dynamics:EnergyDynamics):
         super().__init__(name)
-
         self.energy_dynamics = energy_dynamics
 
     def step(self, action: EnergyAction) -> [State, Reward]:
@@ -47,34 +41,9 @@ class ElementaryNetworkEntity(NetworkEntity):
 
         return out
 
-    def predict(self, action: EnergyAction, state):
+    def predict(self, action: EnergyAction, state: State):
         out = {}
         for action, params in action.items():
             out[action] = self.energy_dynamics.predict(action, params, state)
 
         return out
-
-class MarketEntity(ElementaryNetworkEntity):
-
-    @abstractmethod
-    def get_bid(self, bid_type, state, args):
-        pass
-
-class CompositeMarketEntity(CompositeNetworkEntity):
-
-    @abstractmethod
-    def get_bid(self, bid_type, state, args):
-        pass
-
-
-class MarketProducer(MarketEntity):
-
-    def __init__(self, name, energy_dynamics: ProductionDynamics):
-        super().__init__(name, energy_dynamics)
-
-
-class MarketConsumer(MarketEntity):
-
-    def __init__(self, name, energy_dynamics: ProductionDynamics):
-        super().__init__(name, energy_dynamics)
-

@@ -1,19 +1,13 @@
 from abc import abstractmethod, ABC
-from typing import Callable, Any
-
-AmountPricePair = tuple[float, float]
-PriceList = list[AmountPricePair]
-ProductionPredFn = Callable[[Any, ...], PriceList]
-ProductionFn = Callable[[Any, ...], AmountPricePair]
-
+from energy_net.defs import EnergyAction, State
 
 class EnergyDynamics():
     @abstractmethod
-    def do(self, action, params, cur_state):
+    def do(self, action:EnergyAction, params, cur_state:State):
         pass
 
     @abstractmethod
-    def predict(self, action, params, state):
+    def predict(self, action:EnergyAction, params, cur_state:State):
         pass
 
 
@@ -29,7 +23,7 @@ class StorageDynamics(EnergyDynamics):
         pass
 
     @abstractmethod
-    def predict_discharge_capability(self, state):
+    def predict_discharge_capability(self, state:State):
         pass
 
     @abstractmethod
@@ -37,7 +31,7 @@ class StorageDynamics(EnergyDynamics):
         pass
 
     @abstractmethod
-    def predict_charge_capability(self, state):
+    def predict_charge_capability(self, state:State):
         pass
 
 

@@ -1,5 +1,6 @@
-from energy_net.network_entity import ElementaryNetworkEntity, MarketProducer, MarketConsumer, CompositeMarketEntity
-from energy_net.dynamics.energy_dynamcis import EnergyDynamics, ProductionDynamics, ConsumptionDynamics
+from energy_net.defs import Bid
+from energy_net.market_entity import MarketProducer, MarketConsumer, CompositeMarketEntity
+from energy_net.dynamics.energy_dynamcis import ProductionDynamics, ConsumptionDynamics
 from energy_net.network_manager import NetworkManager
 from energy_net.utils import AggFuncSum as AggFuncSum
 
@@ -7,7 +8,7 @@ class DummyStationDynamics(ProductionDynamics):
     def __init__(self, production_capacity):
         self.production_capacity = production_capacity
 
-    def do(self, action, params, cur_state):
+    def do(self, action, params):
         if action == "produce":
             return min(params['amount'], self.production_capacity)
         else:
@@ -21,15 +22,15 @@ class DummyStationDynamics(ProductionDynamics):
         else:
             raise NotImplemented('stations can only produce')
 
-
 class DummyProducer(MarketProducer):
     def __init__(self, name, energy_dynamics: ProductionDynamics, fixed_price):
         super().__init__(name, energy_dynamics)
         self.fixed_price = fixed_price
 
-    def get_bid(self, bid_type, state, args):
+    def get_bid(self, bid_type, state, args) -> Bid:
         if bid_type=='production':
-            return self.energy_dynamics.production_capacity, self.fixed_price
+            bid = [self.energy_dynamics.production_capacity, self.fixed_price]
+            return bid
         else:
             return None
 
@@ -37,7 +38,7 @@ class DummyConsumptionDynamics(ConsumptionDynamics):
     def __init__(self, fixed_consumption):
         self.consumption = fixed_consumption
 
-    def do(self, action, params, cur_state):
+    def do(self, action, params):
         if action == 'consume':
             return self.consumption
         else:
@@ -56,8 +57,6 @@ class DummyConsumer(MarketConsumer):
     def get_bid(self, bid_type, state, args):
         return None
 
-
-
 def test_elementary_network_market():
     station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
     station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
@@ -74,7 +73,7 @@ def test_elementary_network_market():
     mgr = NetworkManager([station1, station2, station3, station4, station5, consumer1, consumer2, consumer3, consumer4])
     demand = mgr.collect_demand(None)
     bids = mgr.collect_production_bids(None, demand)
-    workloads, price = mgr.market_clearing(demand, bids)
+    workloads, price = mgr.market_clearing_merit_order(demand, bids)
 
     print(f'demand was: {demand}')
     print(f'bids were: {bids}')
@@ -99,7 +98,7 @@ def test_composite_network_market():
     mgr = NetworkManager([station1, station2, station3, station4, station5,consumer_aggregator])
     demand = mgr.collect_demand(None)
     bids = mgr.collect_production_bids(None, demand)
-    workloads, price = mgr.market_clearing(demand, bids)
+    workloads, price = mgr.market_clearing('merit_order',demand, bids)
 
     print(f'demand was: {demand}')
     print(f'bids were: {bids}')
@@ -108,7 +107,7 @@ def test_composite_network_market():
 
 
 if __name__ == "__main__":
-    #test_elementary_network_market()
+    test_elementary_network_market()
     test_composite_network_market()
 
 #############################
