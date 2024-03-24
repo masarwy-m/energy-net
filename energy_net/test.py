@@ -1,6 +1,6 @@
 import unittest
 from defs import EnergyAction
-from entities.private_storage import Battery
+from entities.local_storage import Battery
 from dynamics.storage_dynamics import BatteryDynamics
 
 class TestBattery(unittest.TestCase):

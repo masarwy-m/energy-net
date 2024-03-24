@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 import sys
 import os
 sys.path.append(os.path.abspath('../defs.py'))
-from defs import EnergyAction, State
+from energy_net.defs import EnergyAction, State
 
 class EnergyDynamics():
     @abstractmethod
