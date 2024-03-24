@@ -1,6 +1,6 @@
 from typing import Callable, Any
 
-from energy_net.defs import State
+from defs import State
 
 AggFunc = Callable[[list[dict[str, Any]]], dict[str, Any]]
 
