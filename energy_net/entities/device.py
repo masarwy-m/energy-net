@@ -1,10 +1,13 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
 from typing import Any, Iterable, List, Mapping, Union
-from energy_net.network_entity import NetworkEntity
 import numpy as np
+import sys
+import os
+sys.path.append(os.path.abspath('../network_entity.py'))
+from network_entity import NetworkEntity, ElementaryNetworkEntity
 np.seterr(divide='ignore', invalid='ignore')
 
-class Device(NetworkEntity):
+class Device(ElementaryNetworkEntity):
     r"""Base device class.
 
     Parameters
@@ -113,3 +116,52 @@ class ElectricDevice(Device):
 
         super().reset()
         self.__electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
+
+class StorageDevice(Device):
+    r"""Base storage device class.
+
+    Parameters
+    ----------
+    capacity : float, default: 0.0
+        Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
+    efficiency : float, default: 0.9
+        Technical efficiency.
+    
+
+    Other Parameters
+    ----------------
+    **kwargs : Any
+        Other keyword arguments used to initialize super class.
+    """
+    
+    def __init__(self, capacity: float = None, efficiency: float = None, **kwargs: Any):
+        self.capacity = capacity
+        super().__init__(efficiency = efficiency, **kwargs)
+
+    @property
+    def capacity(self) -> float:
+        r"""Maximum amount of energy the storage device can store in [kWh]."""
+
+        return self.__capacity
+
+        """Efficiency square root."""
+
+        return self.efficiency**0.5
+
+    @capacity.setter
+    def capacity(self, capacity: float):
+        capacity = 0.0 if capacity is None else capacity
+        assert capacity >= 0, 'capacity must be >= 0.'
+        self.__capacity = capacity
+
+    def get_metadata(self) -> Mapping[str, Any]:
+        return {
+            **super().get_metadata(),
+            'capacity': self.capacity,
+        }
+
+    def reset(self):
+        r"""Reset `StorageDevice` to initial state."""
+
+        super().reset()
+

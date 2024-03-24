@@ -1,5 +1,8 @@
 from abc import abstractmethod, ABC
-from energy_net.defs import EnergyAction, State
+import sys
+import os
+sys.path.append(os.path.abspath('../defs.py'))
+from defs import EnergyAction, State
 
 class EnergyDynamics():
     @abstractmethod
@@ -18,6 +21,7 @@ class ConsumptionDynamics(EnergyDynamics):
     pass
 
 class StorageDynamics(EnergyDynamics):
+    
     @abstractmethod
     def get_current_discharge_capability(self):
         pass
