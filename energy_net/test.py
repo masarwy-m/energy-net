@@ -18,8 +18,14 @@ class TestBattery(unittest.TestCase):
         self.assertEqual(self.battery.capacity_history, [100])
 
     def test_energy_dynamics(self):
-        self.battery.step(action=EnergyAction(charge=dict(charge_amount = 10, device=self.battery)))
-        self.assertEqual(self.battery.capacity, 110)
+        new_state_of_charge = self.battery.step(action=EnergyAction(charge=10), state=dict(state_of_charge=self.battery.state_of_charge, capacity=self.battery.capacity))
+        self.assertEqual(new_state_of_charge, 10)
+        self.battery.update_state_of_charge(new_state_of_charge)
+        self.assertEqual(self.battery.capacity, 100)
+        self.assertEqual(self.battery.state_of_charge, 10)
+        new_state_of_charge = self.battery.step(action=EnergyAction(charge=100), state=dict(state_of_charge=self.battery.state_of_charge, capacity=self.battery.capacity))
+        self.assertEqual(new_state_of_charge, 100)
+        
 
 if __name__ == '__main__':
     unittest.main()
