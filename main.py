@@ -1,8 +1,10 @@
-from energy_net.defs import Bid
-from energy_net.market_entity import MarketProducer, MarketConsumer, CompositeMarketEntity
+from energy_net.defs import Bid, State
+from energy_net.market_entity import MarketProducer, MarketConsumer
+from energy_net.network_entity import NetworkEntity, ElementaryNetworkEntity
 from energy_net.dynamics.energy_dynamcis import ProductionDynamics, ConsumptionDynamics
 from energy_net.network_manager import NetworkManager
-from energy_net.utils import AggFuncSum as AggFuncSum
+from energy_net.utils import agg_func_sum as AggFuncSum, agg_func_sum
+
 
 class DummyStationDynamics(ProductionDynamics):
     def __init__(self, production_capacity):
@@ -17,14 +19,19 @@ class DummyStationDynamics(ProductionDynamics):
     def predict(self, action, params, state):
         if action == "produce":
             return min(params['amount'], self.production_capacity)
-        elif action == "consume":
+        elif action == "consumption":
             return 0
         else:
             raise NotImplemented('stations can only produce')
 
-class DummyProducer(MarketProducer):
+
+class DummyProducer(ElementaryNetworkEntity):
+    def __init__(self, name, energy_dynamics: ProductionDynamics):
+        super().__init__(name, energy_dynamics=energy_dynamics)
+
+class DummyMarketProducer(MarketProducer):
     def __init__(self, name, energy_dynamics: ProductionDynamics, fixed_price):
-        super().__init__(name, energy_dynamics)
+        super().__init__(name, network_entity=DummyProducer(name, energy_dynamics))
         self.fixed_price = fixed_price
 
     def get_bid(self, bid_type, state, args) -> Bid:
@@ -33,6 +40,10 @@ class DummyProducer(MarketProducer):
             return bid
         else:
             return None
+
+    def predict(self, action, params, state):
+        return self.network_entity.predict(action, params, state)
+
 
 class DummyConsumptionDynamics(ConsumptionDynamics):
     def __init__(self, fixed_consumption):
@@ -45,12 +56,12 @@ class DummyConsumptionDynamics(ConsumptionDynamics):
             raise NotImplemented('consumers can only consume')
 
     def predict(self, action, params, state):
-        if action == "consume":
+        if action == "consumption":
             return self.consumption
         else:
             raise NotImplemented('consumers can only consume')
 
-class DummyConsumer(MarketConsumer):
+class DummyMarketConsumer(MarketConsumer):
     def __init__(self, name, energy_dynamics: ConsumptionDynamics):
         super().__init__(name, energy_dynamics)
 
@@ -58,11 +69,11 @@ class DummyConsumer(MarketConsumer):
         return None
 
 def test_elementary_network_market():
-    station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
-    station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
-    station3 = DummyProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
-    station4 = DummyProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
-    station5 = DummyProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
+    station1 = DummyMarketProducer(name= 'station1', energy_dynamics=DummyStationDynamics(production_capacity=200), fixed_price=10)
+    station2 = DummyMarketProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
+    station3 = DummyMarketProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
+    station4 = DummyMarketProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
+    station5 = DummyMarketProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
 
     consumer1 = DummyConsumer('consumer1', DummyConsumptionDynamics(fixed_consumption=200))
     consumer2 = DummyConsumer('consumer2', DummyConsumptionDynamics(fixed_consumption=400))
@@ -81,20 +92,22 @@ def test_elementary_network_market():
     print(f'final price is: {price}')
 
 
-def test_composite_network_market():
-    station1 = DummyProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
-    station2 = DummyProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
-    station3 = DummyProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
-    station4 = DummyProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
-    station5 = DummyProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
 
-    consumer1 = DummyConsumer('consumer1', DummyConsumptionDynamics(fixed_consumption=20))
-    consumer2 = DummyConsumer('consumer2', DummyConsumptionDynamics(fixed_consumption=400))
-    consumer3 = DummyConsumer('consumer3', DummyConsumptionDynamics(fixed_consumption=60))
-    consumer4 = DummyConsumer('consumer4', DummyConsumptionDynamics(fixed_consumption=800))
+
+def test_composite_network_market():
+    station1 = DummyMarketProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
+    station2 = DummyMarketProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
+    station3 = DummyMarketProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
+    station4 = DummyMarketProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
+    station5 = DummyMarketProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
+
+    consumer1 = DummyMarketConsumer('consumer1', DummyConsumptionDynamics(fixed_consumption=20))
+    consumer2 = DummyMarketConsumer('consumer2', DummyConsumptionDynamics(fixed_consumption=400))
+    consumer3 = DummyMarketConsumer('consumer3', DummyConsumptionDynamics(fixed_consumption=60))
+    consumer4 = DummyMarketConsumer('consumer4', DummyConsumptionDynamics(fixed_consumption=800))
 
     # this is the key difference from the elementary implementation
-    consumer_aggregator = CompositeMarketEntity('agg1',[consumer1, consumer2, consumer3, consumer4], AggFuncSum)
+    consumer_aggregator = DummyConsumerAggregator('agg1', [], agg_func_sum)
     mgr = NetworkManager([station1, station2, station3, station4, station5,consumer_aggregator])
     demand = mgr.collect_demand(None)
     bids = mgr.collect_production_bids(None, demand)
@@ -105,10 +118,27 @@ def test_composite_network_market():
     print(f'workloads are: {workloads}')
     print(f'final price is: {price}')
 
+def test_market_run():
+    station1 = DummyMarketProducer('station1', DummyStationDynamics(production_capacity=200), fixed_price=10)
+    station2 = DummyMarketProducer('station2', DummyStationDynamics(production_capacity=300), fixed_price=2)
+    station3 = DummyMarketProducer('station3', DummyStationDynamics(production_capacity=400), fixed_price=4)
+    station4 = DummyMarketProducer('station4', DummyStationDynamics(production_capacity=500), fixed_price=100)
+    station5 = DummyMarketProducer('station5', DummyStationDynamics(production_capacity=600), fixed_price=42)
+
+    consumer1 = DummyMarketConsumer('consumer1', DummyConsumptionDynamics(fixed_consumption=20))
+    consumer2 = DummyMarketConsumer('consumer2', DummyConsumptionDynamics(fixed_consumption=400))
+    consumer3 = DummyMarketConsumer('consumer3', DummyConsumptionDynamics(fixed_consumption=60))
+    consumer4 = DummyMarketConsumer('consumer4', DummyConsumptionDynamics(fixed_consumption=800))
+
+    # this is the key difference from the elementary implementation
+    mgr = NetworkManager([station1, station2, station3, station4, station5, consumer1, consumer2, consumer3, consumer4])
+    state = State({'time':0})
+    print(mgr.run(state))
 
 if __name__ == "__main__":
-    test_elementary_network_market()
-    test_composite_network_market()
+    #test_elementary_network_market()
+    #test_composite_network_market()
+    test_market_run()
 
 #############################
 

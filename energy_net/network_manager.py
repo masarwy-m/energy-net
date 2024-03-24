@@ -1,30 +1,37 @@
-from energy_net import NetworkEntity
+from energy_net.market_entity import MarketEntity
 from energy_net.defs import State, Bid
+from energy_net.utils import condition, get_predicted_state
 
 
 class NetworkManager:
-    def __init__(self, grid_agents:list[NetworkEntity]):
-        self.grid_agents = grid_agents
+    def __init__(self, market_entities:list[MarketEntity]):
+        self.market_entities = market_entities
 
-    def collect_demand(self, state:State):
-        total_consumption = 0
-        for ga in self.grid_agents:
-            total_consumption += ga.predict({'consume': {}}, state)['consume']
+    def do_market_clearing(self, state:State):
+        demand = self.collect_demand(state)
+        bids = self.collect_production_bids(state, demand)
+        workloads, price = self.market_clearing_merit_order(demand, bids)
+        return [demand,bids,workloads,price]
 
-        return total_consumption
+    def collect_demand(self, state:State)->float:
+        total_demand = 0
+        for ma in self.market_entities:
+            cur_prediction = ma.predict({'consumption': {}}, state)
+            if cur_prediction:
+                total_demand += cur_prediction
+        return total_demand
 
     def collect_production_bids(self, state:State, demand:float) -> dict[str, Bid]:
         bids = {}
-        for ga in self.grid_agents:
-            bid = ga.get_bid('production',state, demand)
+        for ma in self.market_entities:
+            bid = ma.get_bid('production',state, demand)
             if bid:
-                bids[ga.name] = bid
+                bids[ma.name] = bid
 
         return bids
 
-    def dispatch(self, consumption_demand, bids):
+    def dispatch(self, consumption_demand, bids)-> tuple[dict[MarketEntity,float], float]:
         sorted_bidders = sorted(bids.keys(), key=lambda k: bids[k][1])
-
         workloads = {}
         last_bid = 0
         for bidder in sorted_bidders:
@@ -34,7 +41,7 @@ class NetworkManager:
             if consumption_demand == 0:
                 break
 
-        return workloads, last_bid
+        return [workloads, last_bid]
 
     def set_price(self, workloads, last_bid):
         return last_bid
@@ -49,3 +56,13 @@ class NetworkManager:
         workloads, last_bid = self.dispatch(consumption_demand, bids)
         price = self.set_price(workloads, last_bid)
         return workloads, price
+
+
+    def run(self, initial_state:State, horizons:list[float]=[24,48], stop_criteria:condition = None):
+        cur_state = initial_state
+        if stop_criteria is None or not stop_criteria(cur_state):
+            for horizon in horizons:
+                predicted_state = get_predicted_state(cur_state,horizon)
+                [demand, bids, workloads, price] = self.do_market_clearing(predicted_state)
+
+        return [demand, bids, workloads, price]

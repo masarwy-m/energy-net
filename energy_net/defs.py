@@ -1,4 +1,5 @@
 from typing import Callable, Any
+
 EnergyAction = dict[str, Any]
 State = dict[str, Any]
 Reward = dict[str, float]
