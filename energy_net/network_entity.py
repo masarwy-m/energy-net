@@ -1,7 +1,7 @@
 from abc import abstractmethod
-from energy_net.dynamics.energy_dynamcis import EnergyDynamics
-from energy_net.utils import AggFunc
-from energy_net.defs import EnergyAction, State, Reward
+from dynamics.energy_dynamcis import EnergyDynamics
+from utils import AggFunc
+from defs import EnergyAction, State, Reward
 class NetworkEntity:
     def __init__(self, name: str):
         self.name = name
@@ -34,8 +34,8 @@ class ElementaryNetworkEntity(NetworkEntity):
         super().__init__(name)
         self.energy_dynamics = energy_dynamics
 
-    def step(self, action: EnergyAction) -> [State, Reward]:
-        pass
+    def step(self, action: EnergyAction, state:State) -> [State, Reward]:
+        return self.energy_dynamics.do(action, state)
 
     def predict(self, action: EnergyAction, state: State):
         pass
