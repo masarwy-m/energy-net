@@ -2,9 +2,9 @@
 
 from typing import Any, List
 from entities.device import StorageDevice
+from defs import INITAL_CAPACITY, BatteryState
 
 
-INITAL_CAPACITY = 0.0
 
 class Battery(StorageDevice):
     r"""Base electricity storage class.
@@ -60,6 +60,10 @@ class Battery(StorageDevice):
         super().reset()
         self._capacity_history = self._capacity_history[0:1]
         self._state_of_charge = INITAL_CAPACITY
+
+    @property
+    def current_state(self) -> BatteryState:
+        return dict(state_of_charge=self.state_of_charge, capacity=self.capacity)
 
 
 

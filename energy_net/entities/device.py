@@ -143,7 +143,7 @@ class StorageDevice(Device):
         r"""Maximum amount of energy the storage device can store in [kWh]."""
 
         return self.__capacity
-
+    
         """Efficiency square root."""
 
         return self.efficiency**0.5

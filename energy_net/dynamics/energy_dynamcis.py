@@ -25,7 +25,13 @@ class ProductionDynamics(EnergyDynamics):
 
 
 class ConsumptionDynamics(EnergyDynamics):
-    pass
+    @abstractmethod
+    def get_current_consumption_capability(self):
+        pass
+
+    @abstractmethod
+    def predict_consumption_capability(self, state:State):
+        pass
 
 class StorageDynamics(EnergyDynamics):
     
