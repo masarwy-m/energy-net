@@ -2,7 +2,7 @@ from abc import abstractmethod, ABC
 import sys
 import os
 sys.path.append(os.path.abspath('../defs.py'))
-from energy_net.defs import EnergyAction, State
+from defs import EnergyAction, State
 
 class EnergyDynamics():
     @abstractmethod
@@ -25,7 +25,13 @@ class ProductionDynamics(EnergyDynamics):
 
 
 class ConsumptionDynamics(EnergyDynamics):
-    pass
+    @abstractmethod
+    def get_current_consumption_capability(self):
+        pass
+
+    @abstractmethod
+    def predict_consumption_capability(self, state:State):
+        pass
 
 class StorageDynamics(EnergyDynamics):
     
