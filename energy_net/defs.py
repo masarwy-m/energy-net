@@ -11,10 +11,24 @@ ProductionFn = Callable[[Any, ...], AmountPricePair]
 Bid = [float, float]
 
 
+##################### Actions ######################
+
+class ChargeAction(TypedDict, total=False):
+    charge: float
+
+class ProduceAction(TypedDict, total=False):
+    produce: float
+
+class ConsumeAction(TypedDict, total=False):
+    consume: float
+
+
 class EnergyAction(TypedDict, total=False):
-    produce: Optional[float]
-    consume: Optional[float]
-    charge: Optional[float]
+    produce: Optional[ProduceAction]
+    consume: Optional[ConsumeAction]
+    charge: Optional[ChargeAction]
+
+
 
 ##################### States ######################
 State = dict[str, Any]
@@ -23,20 +37,13 @@ class BatteryState(TypedDict):
     capacity: float
     state_of_charge: float
 
-class PVState(TypedDict):
-    nominal_power: float
+class ProducerState(TypedDict):
+    max_produce: float
     efficiency: float
 
 
-class HeaterState(TypedDict):
+class ConsumerState(TypedDict):
     efficiency: float
     max_electric_power : float
 
-
-
-##################### Constants ######################
-INITAL_CAPACITY = 0.0
-MAX_ELECTRIC_POWER = 100
-NO_EFFICIENCY = 1
-MIN_POWER = 0
 
