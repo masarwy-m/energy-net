@@ -1,69 +1,64 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
 
-from typing import Any, List
+from typing import Any, TypedDict
+from defs import BatteryState, ChargeAction
 from entities.device import StorageDevice
-from defs import INITAL_CAPACITY, BatteryState
-
+from gymnasium.spaces import Box
+import numpy as np
+from env.config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY
 
 
 class Battery(StorageDevice):
-    r"""Base electricity storage class.
+    """Base electricity storage class.
 
     Parameters
     ----------
-    capacity : float, default: 0.0
+    capacity : float, default: inf
         Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
+    efficiency : float, default: 1.0
+        Technical efficiency.
+    initial_charge : float, default: 0.0
+        Initial state of charge of the storage device.
+
     
     Other Parameters
     ----------------
     **kwargs : Any
         Other keyword arguments used to initialize super classes.
     """
-    def __init__(self, capacity: float = None, **kwargs: Any):
-        self._capacity_history = []
-        super().__init__(capacity=capacity, **kwargs)
-        self._state_of_charge = INITAL_CAPACITY
-        self._capacity_history = [self.capacity]
-
-
-    @property
-    def degraded_capacity(self) -> float:
-        r"""Maximum amount of energy the storage device can store after degradation in [kWh]."""
-
-        return self.capacity_history[-1]
-
-
-    @property
-    def capacity_history(self) -> List[float]:
-        """Time series of maximum amount of energy the storage device can store in [kWh]."""
-
-        return self._capacity_history
-    
-    @property
-    def state_of_charge(self):
-        return self._state_of_charge
-    
-    @state_of_charge.setter
-    def state_of_charge(self, state_of_charge: float):
-        assert state_of_charge >= INITAL_CAPACITY, 'state_of_charge must be >= INITAL_CAPACITY.'
-        assert state_of_charge <= self.capacity, 'state_of_charge must be <= capacity.'
-        self._state_of_charge = state_of_charge
-
-    def update_state_of_charge(self, new_state_of_charge: float):
-        r"""Update the state of charge of the battery."""
-
-        self.state_of_charge = new_state_of_charge
-
-    def reset(self):
-        r"""Reset `Battery` to initial state."""
-
-        super().reset()
-        self._capacity_history = self._capacity_history[0:1]
-        self._state_of_charge = INITAL_CAPACITY
+    def __init__(self, **kwargs: Any):
+        super().__init__(**kwargs)
+        self.action_type = ChargeAction
 
     @property
     def current_state(self) -> BatteryState:
         return dict(state_of_charge=self.state_of_charge, capacity=self.capacity)
+    
+    def get_current_state(self) -> BatteryState:
+        return self.current_state
+    
+    def update_state(self, state: BatteryState) -> None:
+        self.state_of_charge = state['state_of_charge']
+
+
+    def get_reward(self):
+        return 0    
+    
+    def reset(self) -> BatteryState:
+        super().reset()
+        return self.get_current_state()
+    
+    def get_action_space(self) -> Box:
+        low = - self.state_of_charge if self.state_of_charge > MIN_CHARGE else MIN_CHARGE
+        return Box(low=low, high=(self.capacity - self.state_of_charge), shape=(1,), dtype=float)  
+
+    def get_observation_space(self) -> Box:
+        return Box(low=np.array([MIN_CHARGE, MIN_EFFICIENCY]), high=np.array([self.capacity, MAX_EFFICIENCY]), dtype=float)
+    
+
+
+        
+        
 
 
 

@@ -1,18 +1,19 @@
-from entities.device import ElectricDevice
+from entities.device import Device
 from typing import Any
-from defs import MAX_ELECTRIC_POWER, NO_EFFICIENCY, MIN_POWER, HeaterState
+from defs import ConsumerState, ConsumeAction
+from env.config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY
+from gymnasium.spaces import Box
+import numpy as np
 
 
-
-class ElectricHeater(ElectricDevice):
-    r"""Base electric heater class.
+class ConsumerDevice(Device):
+    """Base consumer class.
 
     Parameters
     ----------
-    nominal_power : float, default: None
+    max_electric_power : float, default: None
         Maximum amount of electric power that the electric heater can consume from the power grid.
-    efficiency : float, default: None
-        Technical efficiency.
+    
 
     Other Parameters
     ----------------
@@ -20,14 +21,12 @@ class ElectricHeater(ElectricDevice):
         Other keyword arguments used to initialize super class.
     """
     
-    def __init__(self, nominal_power: float = None, efficiency: float = None, max_electric_power:float = None, **kwargs: Any):
-        super().__init__(nominal_power = nominal_power, efficiency = efficiency, **kwargs)
+    def __init__(self, max_electric_power:float = None, **kwargs: Any):
+        super().__init__(**kwargs)
         self.max_electric_power = MAX_ELECTRIC_POWER if max_electric_power is None else max_electric_power
+        self.init_max_electric_power = self.max_electric_power
+        self.action_type = ConsumeAction
 
-    @ElectricDevice.efficiency.setter
-    def efficiency(self, efficiency: float):
-        efficiency = NO_EFFICIENCY if efficiency is None else efficiency   
-        ElectricDevice.efficiency.fset(self, efficiency)
 
     @property
     def max_electric_power(self):
@@ -39,7 +38,34 @@ class ElectricHeater(ElectricDevice):
         self._max_electric_power = max_electric_power
 
     @property
-    def current_state(self) -> HeaterState:
+    def current_state(self) -> ConsumerState:
         return dict(efficiency=self.efficiency, max_electric_power=self.max_electric_power)
+    
+    def get_current_state(self) -> ConsumerState:
+        return self.current_state
+    
+
+    def update_state(self, state: ConsumerState):
+        self.max_electric_power = state['max_electric_power']
+        self.efficiency = state['efficiency']
+        
+
+    def get_reward(self):
+        return 0
+    
+    def reset(self) -> ConsumerState:
+        super().reset()
+        self.max_electric_power = self.init_max_electric_power
+        return self.get_current_state()
+
+
+    def get_action_space(self):
+        return Box(low=MIN_POWER, high=self.max_electric_power, shape=(1,), dtype=float)
+        
+
+    def get_observation_space(self):
+        return Box(low=np.array([MIN_POWER, MIN_EFFICIENCY]), high=np.array([MAX_ELECTRIC_POWER, MAX_EFFICIENCY]), dtype=float)
+        
+    
    
 
