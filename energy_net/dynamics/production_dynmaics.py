@@ -1,26 +1,29 @@
 from dynamics.energy_dynamcis import  ProductionDynamics
-from defs import EnergyAction, PVState
+from defs import  ProducerState
+from numpy.typing import ArrayLike
 
 class PVDynamics(ProductionDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action:EnergyAction, state:PVState) -> float: 
-        r"""Get solar generation output.
+    def do(self, action:ArrayLike, state:ProducerState) -> ProducerState: 
+        """Get solar generation output.
 
         Parameters
         ----------
-        action : EnergyAction
-            Action to be performed. Must be a dictionary with a single key-value pair.
+        action : ArrayLike
+            Action to be performed. Must be a ArrayLike.
         state : PVState
             Current state of the PV array.
-        return : float
-            Solar generation output in [kW].
+        return : ProducerState
+            New state of the PV array.
         """
-
-        value = action.get('produce')
+        assert action.ndim == 1, 'Only one action is allowed'
+        value = action[0]
         if value is not None:
-            return state['nominal_power'] * state['efficiency']
+            new_state = state.copy()
+            new_state['max_produce'] = value * state['efficiency']
+            return new_state	
         else:
             raise ValueError('Invalid action')
 

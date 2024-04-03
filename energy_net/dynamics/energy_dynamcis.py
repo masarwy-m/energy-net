@@ -1,4 +1,4 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 import sys
 import os
 sys.path.append(os.path.abspath('../defs.py'))

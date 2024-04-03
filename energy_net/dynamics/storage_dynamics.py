@@ -1,29 +1,32 @@
 
 from dynamics.energy_dynamcis import StorageDynamics
-from defs import EnergyAction, BatteryState
-
-
+from defs import  BatteryState
+from numpy.typing import ArrayLike 
+from env.config import MIN_CHARGE
 
 
 class BatteryDynamics(StorageDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action:EnergyAction, state:BatteryState) -> float:
+    def do(self, action: ArrayLike, state:BatteryState) -> BatteryState:
         
-        r"""Perform action on battery.
+        """Perform action on battery.
             parameters
             ----------
-            action : EnergyAction
-                Action to be performed. Must be a dictionary with a single key-value pair.
+            action : Numpy array
+                Action to be performed. Must be a numpy array with a single value.
             state : BatteryState
                 Current state of the battery.
-            return : float
+            return : BatteryState
                 New state of charge in [kWh].
         """
-        value = action.get('charge')
+        assert action.ndim == 1, 'Only one action is allowed'
+        value = action[0]
         if value is not None:
-            return state['state_of_charge'] + value if state['state_of_charge'] + value <= state['capacity'] else state['capacity']	
+            new_state = state.copy()
+            new_state['state_of_charge'] = max(state['state_of_charge'] + value, MIN_CHARGE) 
+            return new_state	
         else:
             raise ValueError('Invalid action')
 
