@@ -1,7 +1,7 @@
 
 import sys
 import os
-
+import warnings
 # Add the project's root directory to sys.path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
@@ -17,7 +17,7 @@ from entities.household import HouseHold
 
 from env.EnergyNetEnv import EnergyNetEnv
 from pettingzoo.test import  parallel_api_test, performance_benchmark, parallel_seed_test
-
+from pettingzoo.test.api_test import missing_attr_warning
 
 class TestEnergyNetEnv(unittest.TestCase):
     def setUp(self):
@@ -56,6 +56,7 @@ class TestEnergyNetEnv(unittest.TestCase):
     def test_parallel_api(self):
         self.env.reset()
         parallel_api_test(self.env, num_cycles=1000)
+        
 
     # def test_performance_benchmark(self):
     #     self.env.reset()
@@ -67,6 +68,7 @@ class TestEnergyNetEnv(unittest.TestCase):
     #         return self.env
     #     self.env.reset()
     #     parallel_seed_test(parallel_env_fn=parallel_env_fn)
+
 
     
 
