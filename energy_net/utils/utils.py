@@ -1,4 +1,4 @@
-from typing import Callable, Any
+from typing import Callable, Any, TypedDict
 
 from defs import State
 
@@ -24,3 +24,12 @@ def get_predicted_state(cur_state:State, horizon:float)->State:
     state = State({'time':cur_state['time']+horizon})
     return state
 
+
+def get_value_by_type(dict, wanted_type):
+    print(dict)
+    print(wanted_type)
+    for value in dict.values():
+        if type(value) is wanted_type:
+            return value
+    
+    return None
