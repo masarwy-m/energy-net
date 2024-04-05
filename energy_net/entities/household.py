@@ -1,13 +1,15 @@
 
 from network_entity import NetworkEntity, CompositeNetworkEntity 
-from utils import AggFunc, get_value_by_type
+from utils.utils import AggFunc, get_value_by_type
 from defs import EnergyAction, State
 from gymnasium.spaces import Dict
 import numpy as np
 from numpy.typing import ArrayLike
 
+
+
 class HouseHold(CompositeNetworkEntity):
-    def __init__(self, name, sub_entities:list[NetworkEntity], agg_func:AggFunc):
+    def __init__(self, name: str = None, sub_entities:list[NetworkEntity] = None, agg_func:AggFunc = None):
         super().__init__(name, sub_entities, agg_func)
         from entities.device import StorageDevice
         self.storage_units = [s for s in sub_entities if isinstance(s, StorageDevice)]
@@ -46,6 +48,20 @@ class HouseHold(CompositeNetworkEntity):
         for name, entity in self.sub_entities.items():
             results[name] = func(entity)
         return results
+   
+   
+def default_household():
+    from entities.local_storage import Battery
+    from dynamics.storage_dynamics import BatteryDynamics
+    from entities.private_producer import PrivateProducer
+    from dynamics.production_dynmaics import PVDynamics
+    from entities.local_consumer import ConsumerDevice
+    from dynamics.consumption_dynamic import ElectricHeaterDynamics
+    battery = Battery(capacity=100, efficiency=0.9, energy_dynamics=BatteryDynamics(), name='test_battery')
+    pv = PrivateProducer(max_produce=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv')
+    load = ConsumerDevice(efficiency=0.9, max_electric_power=100, energy_dynamics=ElectricHeaterDynamics(), name='test_heater')
+    return HouseHold(name='test_household', sub_entities=[battery, pv, load], agg_func=lambda x: x) 
+    
 
 
 

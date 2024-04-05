@@ -1,5 +1,5 @@
 from entities.device import Device
-from typing import Any, TypedDict
+from typing import Any
 from defs import ProducerState, ProduceAction
 from gymnasium.spaces import Box
 from env.config import MIN_POWER, MAX_ELECTRIC_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY

@@ -1,6 +1,7 @@
 from abc import abstractmethod
+
 from dynamics.energy_dynamcis import EnergyDynamics
-from utils import AggFunc
+from utils.utils import AggFunc
 from defs import EnergyAction, State, Reward
 from gymnasium import spaces
 from numpy.typing import ArrayLike
