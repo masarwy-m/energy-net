@@ -24,7 +24,7 @@ class ElectricHeaterDynamics(ConsumptionDynamics):
         value = action[0]
         if value is not None:
             new_state = state.copy()
-            new_state['max_electric_power'] = value * state['efficiency']
+            new_state.consumption = min(value, state.max_electric_power)
             return new_state	
         else:
             raise ValueError('Invalid action')

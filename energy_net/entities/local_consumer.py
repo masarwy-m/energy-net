@@ -1,7 +1,7 @@
 from entities.device import Device
 from typing import Any
 from defs import ConsumerState, ConsumeAction
-from env.config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY
+from env.config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 from gymnasium.spaces import Box
 import numpy as np
 
@@ -26,6 +26,7 @@ class ConsumerDevice(Device):
         self.max_electric_power = MAX_ELECTRIC_POWER if max_electric_power is None else max_electric_power
         self.init_max_electric_power = self.max_electric_power
         self.action_type = ConsumeAction
+        self.consumption = NO_CONSUMPTION
 
 
     @property
@@ -39,15 +40,17 @@ class ConsumerDevice(Device):
 
     @property
     def current_state(self) -> ConsumerState:
-        return dict(efficiency=self.efficiency, max_electric_power=self.max_electric_power)
+        return ConsumerState(max_electric_power=self.max_electric_power, efficiency=self.efficiency)
     
     def get_current_state(self) -> ConsumerState:
         return self.current_state
     
 
     def update_state(self, state: ConsumerState):
-        self.max_electric_power = state['max_electric_power']
-        self.efficiency = state['efficiency']
+        self.max_electric_power = state.max_electric_power
+        self.efficiency = state.efficiency
+        self.consumption = state.consumption
+
         
 
     def get_reward(self):
@@ -56,6 +59,7 @@ class ConsumerDevice(Device):
     def reset(self) -> ConsumerState:
         super().reset()
         self.max_electric_power = self.init_max_electric_power
+        self.consumption = NO_CONSUMPTION
         return self.get_current_state()
 
 
@@ -64,7 +68,10 @@ class ConsumerDevice(Device):
         
 
     def get_observation_space(self):
-        return Box(low=np.array([MIN_POWER, MIN_EFFICIENCY]), high=np.array([MAX_ELECTRIC_POWER, MAX_EFFICIENCY]), dtype=float)
+        # Define the lower and upper bounds for each dimension of the observation space
+        low = np.array([NO_CONSUMPTION, MIN_POWER, MIN_EFFICIENCY])  # Example lower bounds
+        high = np.array([self.max_electric_power, MAX_ELECTRIC_POWER, MAX_EFFICIENCY])  # Example upper bounds
+        return Box(low=low, high=high, dtype=np.float32)
         
     
    

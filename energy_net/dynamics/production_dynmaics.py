@@ -22,7 +22,7 @@ class PVDynamics(ProductionDynamics):
         value = action[0]
         if value is not None:
             new_state = state.copy()
-            new_state['max_produce'] = value * state['efficiency']
+            new_state.production = min(value, state.max_produce)
             return new_state	
         else:
             raise ValueError('Invalid action')
