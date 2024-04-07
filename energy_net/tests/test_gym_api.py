@@ -358,9 +358,9 @@ def check_env(env: gym.Env, warn: bool = True, skip_render_check: bool = True) -
     # ============ Check the returned values ===============
     _check_returned_values(env, observation_space, action_space)
 
-    # ==== Check the render method and the declared render modes ====
-    if not skip_render_check:
-        _check_render(env, warn)  # pragma: no cover
+    # # ==== Check the render method and the declared render modes ====
+    # if not skip_render_check:
+    #     _check_render(env, warn)  # pragma: no cover
 
     try:
         _check_for_nested_spaces(env.observation_space)

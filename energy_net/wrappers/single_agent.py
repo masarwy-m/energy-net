@@ -18,7 +18,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
         super().__init__(env)
 
         # assert single agent environment
-        print(self.env.possible_agents, "possible agents")
         assert len(env.possible_agents) == 1
 
     
@@ -29,14 +28,19 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
         # run `reset` as usual.
         out = self.env.reset(seed=seed,
                              options=kwargs or None)
+       
         
 
         # check if infos are a part of the reset return
         if out and isinstance(out, tuple):
             obs, infos = out
+            
         else:
             obs = out
             infos = {k: {} for k in obs.keys()}
+
+         
+        
 
         # return the single entry value as is.
         # no need for the key (only one agent)
@@ -44,8 +48,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
 
     def step(self, action):
         # step using "joint action" of a single agnet as a dictionary
-        print(action, "Before")
-        print(self.action(action), "After")
         step_rets = self.env.step({self.env.agents[0]: action})
 
         # unpack step return values from their dictionaries
@@ -59,6 +61,9 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
     @property  # make property for gym-like access
     def observation_space(self, _=None):  # ignore second argument in API
         # get observation space of the single agent
+        # print(self.env.observation_space(self.env.possible_agents[0]), "Observation Space")
+        # print(self._flatten_action_space(self.env.observation_space(self.env.possible_agents[0])), "Flattened Observation Space")
+        # print(self._flatten_obs(self.env.observation_space(self.env.possible_agents[0])), "Flatten Observation Space")
         return self.env.observation_space(self.env.possible_agents[0])
 
     def seed(self, seed=None):
@@ -83,6 +88,23 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
             return {key: split_action for key, split_action in zip(self.env.action_space.spaces.keys(), split_actions)}
         else:
             return action   
+        
+    @staticmethod
+    def _flatten_obs(obs_space):
+        if isinstance(obs_space, gym.spaces.Dict):
+            flattened_obs_space = gym.spaces.Box(
+                low=np.concatenate([space.low for space in obs_space.spaces.values()]),
+                high=np.concatenate([space.high for space in obs_space.spaces.values()]),
+                dtype=np.float32,
+            )
+            
+            def flatten_dict_obs(obs_dict):
+                flattened_obs = np.concatenate([obs_dict[key] for key in obs_space.spaces.keys()])
+                return flattened_obs.astype(np.float32)
+            
+            return flattened_obs_space, flatten_dict_obs
+        else:
+            return obs_space
 
 
 class SingleEntityWrapper(SingleAgentParallelEnvToGymWrapper):
