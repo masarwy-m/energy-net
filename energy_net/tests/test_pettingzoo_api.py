@@ -70,7 +70,61 @@ class TestEnergyNetEnv(unittest.TestCase):
     #     parallel_seed_test(parallel_env_fn=parallel_env_fn)
 
 
-    
+class TestBattery(unittest.TestCase):
+    def setUp(self):
+        self.battery = Battery(energy_capacity = 100, power_capacity = 200,
+                    state_of_charge = 50, charging_efficiency = 1,
+                    discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery')
+
+    def test_initialization(self):
+        self.assertEqual(self.battery.energy_capacity, 100)
+        self.assertEqual(self.battery.power_capacity, 200)
+        self.assertEqual(self.battery.state_of_charge, 50)
+        self.assertEqual(self.battery.charging_efficiency, 1)
+        self.assertEqual(self.battery.discharging_efficiency, 1)
+        self.assertEqual(self.battery.lifetime_constant, 15)
+
+    def test_energy_dynamics(self):
+        new_state_of_charge = self.battery.step(action=EnergyAction(charge=10),
+                                                state=dict(state_of_charge=self.battery.state_of_charge,
+                                                           energy_capacity=self.battery.energy_capacity,
+                                                           power_capacity=self.battery.power_capacity,
+                                                           charging_efficiency=self.battery.charging_efficiency,
+                                                           discharging_efficiency=self.battery.discharging_efficiency,
+                                                           lifetime_constant=self.battery.lifetime_constant
+                                                           ))
+        self.assertEqual(new_state_of_charge, 10)
+        self.battery.update_state_of_charge(new_state_of_charge)
+        new_energy_capacity = 100 * math.exp(-1/self.battery.lifetime_constant)
+        new_power_capacity = 200 * math.exp(-1 / self.battery.lifetime_constant)
+        new_charging_efficiency = 1 * math.exp(-1/self.battery.lifetime_constant)
+        new_discharging_efficiency = 1 * math.exp(-1/self.battery.lifetime_constant)
+        self.assertEqual(self.battery.energy_capacity, new_energy_capacity)
+        self.assertEqual(self.battery.power_capacity, new_power_capacity)
+        self.assertEqual(self.battery.state_of_charge, 60)
+        self.assertEqual(self.battery.charging_efficiency, new_charging_efficiency)
+        self.assertEqual(self.battery.discharging_efficiency, new_discharging_efficiency)
+        self.assertEqual(self.battery.lifetime_constant, 15)
+        new_state_of_charge = self.battery.step(action=EnergyAction(charge=-5),
+                                                state=dict(state_of_charge=self.battery.state_of_charge,
+                                                           energy_capacity=self.battery.energy_capacity,
+                                                           power_capacity=self.battery.power_capacity,
+                                                           charging_efficiency=self.battery.charging_efficiency,
+                                                           discharging_efficiency=self.battery.discharging_efficiency,
+                                                           lifetime_constant=self.battery.lifetime_constant
+                                                           ))
+        self.assertEqual(new_state_of_charge, -5)
+        self.battery.update_state_of_charge(new_state_of_charge)
+        new_energy_capacity = new_energy_capacity * math.exp(-1 / self.battery.lifetime_constant)
+        new_power_capacity = new_power_capacity * math.exp(-1 / self.battery.lifetime_constant)
+        new_charging_efficiency = new_charging_efficiency * math.exp(-1 / self.battery.lifetime_constant)
+        new_discharging_efficiency = new_discharging_efficiency * math.exp(-1 / self.battery.lifetime_constant)
+        self.assertEqual(self.battery.energy_capacity, new_energy_capacity)
+        self.assertEqual(self.battery.power_capacity, new_power_capacity)
+        self.assertEqual(self.battery.state_of_charge, 55)
+        self.assertEqual(self.battery.charging_efficiency, new_charging_efficiency)
+        self.assertEqual(self.battery.discharging_efficiency, new_discharging_efficiency)
+        self.assertEqual(self.battery.lifetime_constant, 15)  
 
 
 

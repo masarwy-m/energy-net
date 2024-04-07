@@ -3,6 +3,7 @@ from dynamics.energy_dynamcis import StorageDynamics
 from defs import  BatteryState
 from numpy.typing import ArrayLike 
 from env.config import MIN_CHARGE
+import math
 
 
 class BatteryDynamics(StorageDynamics):
@@ -25,7 +26,14 @@ class BatteryDynamics(StorageDynamics):
         value = action[0]
         if value is not None:
             new_state = state.copy()
-            new_state['state_of_charge'] = max(state['state_of_charge'] + value, MIN_CHARGE) 
+            if value > 0:
+                new_state.state_of_charge = min(state.state_of_charge + value, state.energy_capacity)
+            else:
+                new_state.state_of_charge = max(state.state_of_charge + value, 0)
+            new_state.energy_capacity = state.energy_capacity * math.exp(state.current_time / state.lifetime_constant)
+            new_state.power_capacity = state.power_capacity * math.exp(state.current_time / state.lifetime_constant)
+            new_state.charging_efficiency = state.charging_efficiency * math.exp(state.current_time / state.lifetime_constant)
+            new_state.discharging_efficiency = state.discharging_efficiency * math.exp(state.current_time / state.lifetime_constant)
             return new_state	
         else:
             raise ValueError('Invalid action')

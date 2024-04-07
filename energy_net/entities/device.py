@@ -9,6 +9,8 @@ from network_entity import ElementaryNetworkEntity
 from env.config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY
 np.seterr(divide='ignore', invalid='ignore')
 
+INF = float('inf')
+
 class Device(ElementaryNetworkEntity):
     """Base device class.
 
@@ -23,10 +25,11 @@ class Device(ElementaryNetworkEntity):
         Other keyword arguments used to initialize super class.
     """
 
-    def __init__(self, efficiency: float = None, **kwargs):
+    def __init__(self, efficiency: float = None, lifetime_constant: float = INF, **kwargs):
         super().__init__(**kwargs)
         self.efficiency = efficiency
         self.init_efficiency = efficiency
+        self.lifetime_constant = lifetime_constant
 
     @property
     def efficiency(self) -> float:
@@ -45,6 +48,9 @@ class Device(ElementaryNetworkEntity):
         """Reset the device to its initial state."""
         self.efficiency = self.init_efficiency
         
+    @property
+    def get_lifetime(self) -> float:
+        return self.lifetime_constant
 
     
 class StorageDevice(Device):
