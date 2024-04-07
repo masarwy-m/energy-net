@@ -12,4 +12,10 @@ MAX_ELECTRIC_POWER = float('inf')
 DEFAULT_TIME_STEP = 1_000
 MIN_PRODUCTION = 0.0
 NO_CONSUMPTION = 0.0
+INITIAL_TIME = 0
+MAX_TIME = float('inf')
+INF = float('inf')
+# Define constants for the maximum and minimum exponent values
+MAX_EXPONENT = 200
+MIN_EXPONENT = -200
 ###################################################
