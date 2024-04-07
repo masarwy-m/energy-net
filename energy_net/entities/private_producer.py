@@ -69,7 +69,7 @@ class PrivateProducer(Device):
         return self.get_current_state()
 
     def get_action_space(self) -> Box:
-        return Box(low=MIN_POWER, high=self.max_produce, shape=(1,), dtype=float)
+        return Box(low=MIN_POWER, high=self.max_produce, shape=(1,), dtype=np.float32)
 
     def get_observation_space(self) -> Box :
         # Define the lower and upper bounds for each dimension of the observation space

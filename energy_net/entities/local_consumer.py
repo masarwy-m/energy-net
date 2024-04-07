@@ -64,7 +64,7 @@ class ConsumerDevice(Device):
 
 
     def get_action_space(self):
-        return Box(low=MIN_POWER, high=self.max_electric_power, shape=(1,), dtype=float)
+        return Box(low=MIN_POWER, high=self.max_electric_power, shape=(1,), dtype=np.float32)
         
 
     def get_observation_space(self):

@@ -5,7 +5,7 @@ from defs import BatteryState, ChargeAction
 from entities.device import StorageDevice
 from gymnasium.spaces import Box
 import numpy as np
-from env.config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY
+from env.config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
 
 
 class Battery(StorageDevice):
@@ -15,10 +15,21 @@ class Battery(StorageDevice):
     ----------
     energy_capacity : float, default: inf
         Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
-    efficiency : float, default: 1.0
-        Technical efficiency.
-    initial_charge : float, default: 0.0
-        Initial state of charge of the storage device.
+    power_capacity : float, default: inf
+        Maximum amount of power the storage device can store in [kW]. Must be >= 0.
+    state_of_charge : float, default: 0.0
+        Current state of charge of the storage device in [kWh]. Must be >= 0.
+    charging_efficiency : float, default: 1.0
+        Charging efficiency of the storage device. Must be > 0.
+    discharging_efficiency : float, default: 1.0
+        Discharging efficiency of the storage device. Must be > 0.
+    lifetime_constant : float, default: inf
+        Lifetime constant of the storage device in years. Must be > 0.
+    energy_dynamics : Dynamics, default: None
+        Energy dynamics of the storage device. Must be a subclass of Dynamics.
+    name : str, default: None
+        Name of the storage device. Must be a string.
+
 
     
     Other Parameters
@@ -29,12 +40,13 @@ class Battery(StorageDevice):
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
         self.action_type = ChargeAction
+        self.current_time = INITIAL_TIME
 
     @property
     def current_state(self) -> BatteryState:
-        return np.array(energy_capacity = self.energy_capacity, power_capacity = self.power_capacity,
+        return BatteryState(energy_capacity = self.energy_capacity, power_capacity = self.power_capacity,
                     state_of_charge = self.state_of_charge, charging_efficiency = self.charging_efficiency,
-                    discharging_efficiency = self.discharging_efficiency, lifetime_constant = self.lifetime_constant)
+                    discharging_efficiency = self.discharging_efficiency, current_time = self.current_time)
     
     def get_current_state(self) -> BatteryState:
         return self.current_state
@@ -45,7 +57,6 @@ class Battery(StorageDevice):
         self.state_of_charge = state.state_of_charge
         self.charging_efficiency = state.charging_efficiency
         self.discharging_efficiency = state.discharging_efficiency
-        self.lifetime_constant = state.lifetime_constant
         self.current_time = state.current_time
 
 
@@ -58,23 +69,12 @@ class Battery(StorageDevice):
     
     def get_action_space(self) -> Box:
         low = - self.state_of_charge if self.state_of_charge > MIN_CHARGE else MIN_CHARGE
-        return Box(low=low, high=(self.capacity - self.state_of_charge), shape=(1,), dtype=float)  
+        return Box(low=low, high=(self.energy_capacity - self.state_of_charge), shape=(1,), dtype=np.float32)  
 
     def get_observation_space(self) -> Box:
-        if self.energy_capacity < 0:
-            raise ValueError("Energy capacity value must be non-negative.")
-
-        if self.charging_efficiency < 0:
-            raise ValueError("Charging efficiency value must be non-negative.")
-
-        if self.discharging_efficiency < 0:
-            raise ValueError("Discharging efficiency value must be non-negative.")
-
-        if self.lifetime_constant < 0:
-            raise ValueError("Battery lifetime value must be non-negative.")
-
-        return Box(low=np.array([MIN_CHARGE, MIN_EFFICIENCY]), high=np.array([self.capacity, MAX_EFFICIENCY]), dtype=float)
-    
+        low = np.array([MIN_CAPACITY, MIN_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_EFFICIENCY, INITIAL_TIME])
+        high = np.array([MAX_CAPACITY, MAX_CAPACITY, self.energy_capacity, MAX_EFFICIENCY, MAX_EFFICIENCY, MAX_TIME])
+        return Box(low=low, high=high, dtype=np.float32)
 
 
         

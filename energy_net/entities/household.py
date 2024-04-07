@@ -9,6 +9,9 @@ from numpy.typing import ArrayLike
 
 
 class HouseHold(CompositeNetworkEntity):
+    """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
+    The household entity is responsible for managing the sub-entities and aggregating the reward.
+    """
     def __init__(self, name: str = None, sub_entities:list[NetworkEntity] = None, agg_func:AggFunc = None):
         super().__init__(name, sub_entities, agg_func)
         from entities.device import StorageDevice
@@ -51,13 +54,16 @@ class HouseHold(CompositeNetworkEntity):
    
    
 def default_household():
+    """Create a default household with a battery, pv, and load."""
     from entities.local_storage import Battery
     from dynamics.storage_dynamics import BatteryDynamics
     from entities.private_producer import PrivateProducer
     from dynamics.production_dynmaics import PVDynamics
     from entities.local_consumer import ConsumerDevice
     from dynamics.consumption_dynamic import ElectricHeaterDynamics
-    battery = Battery(capacity=100, efficiency=0.9, energy_dynamics=BatteryDynamics(), name='test_battery')
+    battery = Battery(energy_capacity = 100, power_capacity = 200,
+                    inital_charge = 50, charging_efficiency = 1,
+                    discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery')
     pv = PrivateProducer(max_produce=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv')
     load = ConsumerDevice(efficiency=0.9, max_electric_power=100, energy_dynamics=ElectricHeaterDynamics(), name='test_heater')
     return HouseHold(name='test_household', sub_entities=[battery, pv, load], agg_func=lambda x: x) 
