@@ -4,7 +4,7 @@ import os
 from numpy.typing import ArrayLike
 import numpy as np 
 sys.path.append(os.path.abspath('../defs.py'))
-from defs import EnergyAction, State
+from defs import State
 
 class EnergyDynamics():
     @abstractmethod
