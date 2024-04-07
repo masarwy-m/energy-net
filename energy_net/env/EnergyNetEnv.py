@@ -76,6 +76,8 @@ class EnergyNetEnv(ParallelEnv):
 
         # get all observations
         observations = self.__observe_all()
+        
+        
 
         if not return_info:
             return observations
@@ -115,6 +117,7 @@ class EnergyNetEnv(ParallelEnv):
             self.agents = []
 
         self.timestep += 1
+        
  
 
         return obs, rewards, terminations, truncs, infos  
