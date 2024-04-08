@@ -1,16 +1,18 @@
-from abc import abstractmethod, ABC
+from abc import abstractmethod
 import sys
 import os
+from numpy.typing import ArrayLike
+import numpy as np 
 sys.path.append(os.path.abspath('../defs.py'))
-from defs import EnergyAction, State
+from defs import State
 
 class EnergyDynamics():
     @abstractmethod
-    def do(self, action:EnergyAction, params, cur_state:State):
+    def do(self, action: ArrayLike, state: np.ndarray, lifetime_constant: float):
         pass
 
     @abstractmethod
-    def predict(self, action:EnergyAction, params, cur_state:State):
+    def predict(self, action: ArrayLike, state: np.ndarray, lifetime_constant: float):
         pass
 
 

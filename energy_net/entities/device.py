@@ -1,19 +1,24 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
-from typing import Any, Iterable, List, Mapping, Union
+from typing import Any
 import numpy as np
 import sys
 import os
 sys.path.append(os.path.abspath('../network_entity.py'))
-from network_entity import NetworkEntity, ElementaryNetworkEntity
+from defs import State
+from network_entity import ElementaryNetworkEntity
+from env.config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY
 np.seterr(divide='ignore', invalid='ignore')
 
+
+
 class Device(ElementaryNetworkEntity):
-    r"""Base device class.
+    """Base device class.
 
     Parameters
     ----------
     efficiency : float, default: 1.0
     Technical efficiency. Must be set to > 0.
+    inital_efficiency : float, default: 1.0
 
     Other Parameters
     ----------------
@@ -24,6 +29,8 @@ class Device(ElementaryNetworkEntity):
     def __init__(self, efficiency: float = None, **kwargs):
         super().__init__(**kwargs)
         self.efficiency = efficiency
+        self.init_efficiency = efficiency
+        
 
     @property
     def efficiency(self) -> float:
@@ -33,99 +40,33 @@ class Device(ElementaryNetworkEntity):
     @efficiency.setter
     def efficiency(self, efficiency: float):
         if efficiency is None:
-            self.__efficiency = 1.0
+            self.__efficiency = NO_EFFICIENCY 
         else:
-            assert efficiency > 0, 'efficiency must be > 0.'
+            assert efficiency > MIN_EFFICIENCY, 'efficiency must be > 0.'
             self.__efficiency = efficiency
 
-    def get_metadata(self) -> Mapping[str, Any]:
-        return {
-            **super().get_metadata(),
-            'efficiency': self.efficiency
-        }
-
-class ElectricDevice(Device):
-    r"""Base electric device class.
-
-    Parameters
-    ----------
-    nominal_power : float, default: 0.0
-        Electric device nominal power >= 0.
-
-    Other Parameters
-    ----------------
-    **kwargs : Any
-        Other keyword arguments used to initialize super class.
-    """
-
-    def __init__(self, nominal_power: float = None, **kwargs: Any):
-        super().__init__(**kwargs)
-        self.nominal_power = nominal_power
-
-    @property
-    def nominal_power(self) -> float:
-        r"""Nominal power."""
-
-        return self.__nominal_power
-
-    @property
-    def electricity_consumption(self) -> np.ndarray:
-        r"""Electricity consumption time series [kWh]."""
-
-        return self.__electricity_consumption
-
-    @property
-    def available_nominal_power(self) -> float:
-        r"""Difference between `nominal_power` and `electricity_consumption` at current `time_step`."""
-
-        return None if self.nominal_power is None else self.nominal_power - self.electricity_consumption[
-            self.time_step]
-
-    @nominal_power.setter
-    def nominal_power(self, nominal_power: float):
-        nominal_power = 0.0 if nominal_power is None else nominal_power
-        assert nominal_power >= 0, 'nominal_power must be >= 0.'
-        self.__nominal_power = nominal_power
-
-    def get_metadata(self) -> Mapping[str, Any]:
-        return {
-            **super().get_metadata(),
-            'nominal_power': self.nominal_power,
-        }
-
-    def update_electricity_consumption(self, electricity_consumption: float, enforce_polarity: bool = None):
-        r"""Updates `electricity_consumption` at current `time_step`.
-
-        Parameters
-        ----------
-        electricity_consumption: float
-            Value to add to current `time_step` `electricity_consumption`. Must be >= 0.
-        enforce_polarity: bool, default: True
-            Whether to allow only positive `electricity_consumption` values. Some electric
-            devices like :py:class:`citylearn.energy_model.Battery` may be bi-directional and
-            allow electricity discharge thus, cause negative electricity consumption.
-        """
-
-        enforce_polarity = True if enforce_polarity is None else enforce_polarity
-        assert not enforce_polarity or electricity_consumption >= 0.0, \
-            f'electricity_consumption must be >= 0 but value: {electricity_consumption} was provided.'
-        self.__electricity_consumption[self.time_step] += electricity_consumption
-
     def reset(self):
-        r"""Reset `ElectricDevice` to initial state and set `electricity_consumption` at `time_step` 0 to = 0.0."""
+        """Reset the device to its initial state."""
+        self.efficiency = self.init_efficiency
+        
 
-        super().reset()
-        self.__electricity_consumption = np.zeros(self.episode_tracker.episode_time_steps, dtype='float32')
-
+    
 class StorageDevice(Device):
-    r"""Base storage device class.
+    """Base storage device class.
 
     Parameters
     ----------
-    capacity : float, default: 0.0
+    energy_capacity : float, default: inf
         Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
-    efficiency : float, default: 0.9
-        Technical efficiency.
+    power_capacity : float, default: inf
+        Maximum amount of power the storage device can store in [kW]. Must be >= 0.
+    charging_efficiency : float, default: 1.0
+        Technical efficiency of the charging process. Must be > 0.
+    discharging_efficiency : float, default: 1.0
+        Technical efficiency of the discharging process. Must be > 0.
+    inital_charge : float, default: 0.0
+        Initial state of charge of the storage device.
+
     
 
     Other Parameters
@@ -133,35 +74,95 @@ class StorageDevice(Device):
     **kwargs : Any
         Other keyword arguments used to initialize super class.
     """
-    
-    def __init__(self, capacity: float = None, efficiency: float = None, **kwargs: Any):
-        self.capacity = capacity
-        super().__init__(efficiency = efficiency, **kwargs)
+    def __init__(self, energy_capacity: float = None, 
+                power_capacity: float = None,
+                charging_efficiency: float = None,
+                discharging_efficiency: float = None,
+                inital_charge: float = None,
+                **kwargs: Any):
+        super().__init__(efficiency = charging_efficiency, **kwargs)
+        self.power_capacity = energy_capacity if energy_capacity is not None else MAX_CAPACITY
+        self.energy_capacity = power_capacity if power_capacity is not None else MAX_CAPACITY
+        self.charging_efficiency = charging_efficiency
+        self.discharging_efficiency = discharging_efficiency
+        self.state_of_charge = inital_charge if inital_charge is not None else NO_CHARGE
+        self.init_power_capacity = self.power_capacity
+        self.init_energy_capacity = self.energy_capacity
+        self.init_state_of_charge = self.state_of_charge
+        
+
 
     @property
-    def capacity(self) -> float:
-        r"""Maximum amount of energy the storage device can store in [kWh]."""
-
-        return self.__capacity
+    def power_capacity(self) -> float:
+        r"""Maximum amount of power the storage device can store in [kW]."""
+        return self.__power_capacity
     
-        """Efficiency square root."""
+    @power_capacity.setter
+    def power_capacity(self, power_capacity: float):
+        power_capacity = MAX_CAPACITY if power_capacity is None else power_capacity
+        assert power_capacity >= MIN_CAPACITY, 'power_capacity must be >= 0.'
+        self.__power_capacity = power_capacity
 
-        return self.efficiency**0.5
+    @property
+    def energy_capacity(self) -> float:
+        r"""Maximum amount of energy the storage device can store in [kWh]."""
+        return self.__energy_capacity
+    
+    @energy_capacity.setter
+    def energy_capacity(self, energy_capacity: float):
+        energy_capacity = MAX_CAPACITY if energy_capacity is None else energy_capacity
+        assert energy_capacity >= MIN_CAPACITY, 'energy_capacity must be >= 0.'
+        self.__energy_capacity = energy_capacity
 
-    @capacity.setter
-    def capacity(self, capacity: float):
-        capacity = 0.0 if capacity is None else capacity
-        assert capacity >= 0, 'capacity must be >= 0.'
-        self.__capacity = capacity
 
-    def get_metadata(self) -> Mapping[str, Any]:
-        return {
-            **super().get_metadata(),
-            'capacity': self.capacity,
-        }
+    @property
+    def charging_efficiency(self) -> float:
+        r"""Technical efficiency of the charging process."""
+        return self.__charging_efficiency
+    
+    @charging_efficiency.setter
+    def charging_efficiency(self, charging_efficiency: float):
+        charging_efficiency = NO_EFFICIENCY if charging_efficiency is None else charging_efficiency
+        assert charging_efficiency > MIN_EFFICIENCY, 'charging_efficiency must be > 0.'
+        self.__charging_efficiency = charging_efficiency
+
+
+    @property
+    def discharging_efficiency(self) -> float:
+        r"""Technical efficiency of the discharging process."""
+        return self.__discharging_efficiency
+    
+    @discharging_efficiency.setter
+    def discharging_efficiency(self, discharging_efficiency: float):
+        discharging_efficiency = NO_EFFICIENCY if discharging_efficiency is None else discharging_efficiency
+        assert discharging_efficiency > MIN_EFFICIENCY, 'discharging_efficiency must be > 0.'
+        self.__discharging_efficiency = discharging_efficiency
+
+
+    @property
+    def state_of_charge(self):
+        r"""Current state of charge of the storage device."""
+        return self._state_of_charge
+    
+    @state_of_charge.setter
+    def state_of_charge(self, state_of_charge: float):
+        assert state_of_charge >= MIN_CHARGE, 'state_of_charge must be >= MIN_CHARGE.'
+        assert state_of_charge <= self.energy_capacity, 'state_of_charge must be <= capacity.'
+        self._state_of_charge = state_of_charge
 
     def reset(self):
-        r"""Reset `StorageDevice` to initial state."""
-
+        """Reset `StorageDevice` to initial state."""
         super().reset()
+        self.power_capacity = self.init_power_capacity
+        self.energy_capacity = self.init_energy_capacity
+        self.state_of_charge = self.init_state_of_charge
+        
+
+    
+    
+        
+
+
+
+        
 

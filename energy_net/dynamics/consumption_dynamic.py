@@ -1,26 +1,31 @@
 from dynamics.energy_dynamcis import ConsumptionDynamics
-from defs import EnergyAction, HeaterState
+from defs import ConsumerState
+from numpy.typing import ArrayLike
 
 
 class ElectricHeaterDynamics(ConsumptionDynamics):
     def __init__(self) -> None:
         super().__init__()
+        
 
-    def do(self, action:EnergyAction, state:HeaterState) -> float:
-        r"""Get electric heater consumption.
+    def do(self, action:ArrayLike, state:ConsumerState, lifetime_constant: float) -> float:
+        """Get electric heater consumption.
         
         Parameters
         ----------
-        action : EnergyAction
-            Action to be performed. Must be a dictionary with a single key-value pair.
+        action : ArrayLike
+            Action to be performed. Must be a numpy array.
         state : HeaterState
             Current state of the electric heater.
         return : float
             Electric heater consumption in [kW].
         """
-        value = action.get('consume')
+        assert action.ndim == 1, 'Only one action is allowed'
+        value = action[0]
         if value is not None:
-            return min(value, state['max_electric_power']) * state['efficiency']
+            new_state = state.copy()
+            new_state.consumption = min(value, state.max_electric_power)
+            return new_state	
         else:
             raise ValueError('Invalid action')
 
