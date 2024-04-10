@@ -2,7 +2,7 @@ from entities.device import Device
 from typing import Any
 from defs import ProducerState, ProduceAction
 from gymnasium.spaces import Box
-from env.config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
+from config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
 import numpy as np
 
 class PrivateProducer(Device):

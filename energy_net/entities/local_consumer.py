@@ -1,7 +1,7 @@
 from entities.device import Device
 from typing import Any
 from defs import ConsumerState, ConsumeAction
-from env.config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
+from config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 from gymnasium.spaces import Box
 import numpy as np
 

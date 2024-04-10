@@ -57,3 +57,11 @@ class TransmissionDynamics(EnergyDynamics):
     pass
 
 
+class ComplexDynamics(EnergyDynamics):
+    @abstractmethod
+    def do(self, action: ArrayLike, state: np.ndarray, sub_entities_dynamics:list[EnergyDynamics]):
+        pass
+
+    @abstractmethod
+    def predict(self, action: ArrayLike, state: np.ndarray, sub_entities_dynamics:list[EnergyDynamics]):
+        pass

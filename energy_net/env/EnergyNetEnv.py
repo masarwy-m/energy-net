@@ -10,8 +10,8 @@ import logging
 
 from network_entity import NetworkEntity
 from defs import EnergyAction
-from env.reward_function import RewardFunction, HouseholdDummyRewardFunction
-from env.config import DEFAULT_TIME_STEP
+from reward_function import RewardFunction, HouseholdDummyRewardFunction
+from config import DEFAULT_TIME_STEP
 from env.base import Environment, EpisodeTracker
 from utils.env_utils import default_network_entities
 
