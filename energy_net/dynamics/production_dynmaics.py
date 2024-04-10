@@ -6,7 +6,7 @@ class PVDynamics(ProductionDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action:ArrayLike, state:ProducerState, *args,  **kwargs) -> ProducerState: 
+    def do(self, action:ArrayLike, state:ProducerState, **parameters) -> ProducerState: 
         """Get solar generation output.
 
         Parameters

@@ -39,6 +39,10 @@ class Device(ElementaryNetworkEntity):
     @lifetime_constant.setter
     def lifetime_constant(self, life_time_constant: float):
         self.__lifetime_constant = life_time_constant
+
+    
+    def dynamic_parametrs(self):
+        return { 'lifetime_constant': self.lifetime_constant }
         
 
     

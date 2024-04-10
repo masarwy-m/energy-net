@@ -8,7 +8,7 @@ class ElectricHeaterDynamics(ConsumptionDynamics):
         super().__init__()
         
 
-    def do(self, action:ArrayLike, state:ConsumerState, *args, **kwargs) -> float:
+    def do(self, action:ArrayLike, state:ConsumerState, **parameters) -> float:
         """Get electric heater consumption.
         
         Parameters
