@@ -2,7 +2,7 @@ from entities.device import Device
 from typing import Any
 from defs import ProducerState, ProduceAction
 from gymnasium.spaces import Box
-from env.config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER
+from env.config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
 import numpy as np
 
 class PrivateProducer(Device):
@@ -20,12 +20,13 @@ class PrivateProducer(Device):
         Other keyword arguments used to initialize super class.
     """
     
-    def __init__(self, max_produce: float = None, efficiency: float = None, **kwargs: Any):
+    def __init__(self, self_consumption: float =None, max_produce: float = None, efficiency: float = None, **kwargs: Any):
         super().__init__(efficiency, **kwargs)
         self.max_produce = max_produce
         self.init_max_produce = self.max_produce
         self.action_type = ProduceAction
         self.production = MIN_PRODUCTION
+        self.self_consumption = self_consumption if self_consumption is not None else DEFAULT_SELF_CONSUMPTION  # self consumption
 
     @property
     def current_state(self) -> ProducerState:
@@ -61,7 +62,7 @@ class PrivateProducer(Device):
         
     
     def get_reward(self):
-        return 0
+        return self.self_consumption
     
     def reset(self):
         super().reset()

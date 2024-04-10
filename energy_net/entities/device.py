@@ -6,7 +6,7 @@ import os
 sys.path.append(os.path.abspath('../network_entity.py'))
 from defs import State
 from network_entity import ElementaryNetworkEntity
-from env.config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY
+from env.config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF
 np.seterr(divide='ignore', invalid='ignore')
 
 
@@ -26,28 +26,19 @@ class Device(ElementaryNetworkEntity):
         Other keyword arguments used to initialize super class.
     """
 
-    def __init__(self, efficiency: float = None, **kwargs):
+    def __init__(self, lifetime_constant: float = None, **kwargs):
         super().__init__(**kwargs)
-        self.efficiency = efficiency
-        self.init_efficiency = efficiency
+        self.__lifetime_constant = lifetime_constant if lifetime_constant is not None else INF
         
 
     @property
-    def efficiency(self) -> float:
+    def lifetime_constant(self) -> float:
         """Technical efficiency."""
-        return self.__efficiency
+        return self.__lifetime_constant
 
-    @efficiency.setter
-    def efficiency(self, efficiency: float):
-        if efficiency is None:
-            self.__efficiency = NO_EFFICIENCY 
-        else:
-            assert efficiency > MIN_EFFICIENCY, 'efficiency must be > 0.'
-            self.__efficiency = efficiency
-
-    def reset(self):
-        """Reset the device to its initial state."""
-        self.efficiency = self.init_efficiency
+    @lifetime_constant.setter
+    def lifetime_constant(self, life_time_constant: float):
+        self.__lifetime_constant = life_time_constant
         
 
     
@@ -80,7 +71,7 @@ class StorageDevice(Device):
                 discharging_efficiency: float = None,
                 inital_charge: float = None,
                 **kwargs: Any):
-        super().__init__(efficiency = charging_efficiency, **kwargs)
+        super().__init__(**kwargs)
         self.power_capacity = energy_capacity if energy_capacity is not None else MAX_CAPACITY
         self.energy_capacity = power_capacity if power_capacity is not None else MAX_CAPACITY
         self.charging_efficiency = charging_efficiency

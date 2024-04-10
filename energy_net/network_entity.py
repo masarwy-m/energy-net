@@ -6,14 +6,15 @@ from defs import EnergyAction, State, Reward
 from gymnasium import spaces
 import numpy as np
 from numpy.typing import ArrayLike
-from env.config import INF
+
+
 class NetworkEntity:
     """
     This is a base class for all network entities. It provides an interface for stepping through actions,
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
 
-    def __init__(self, lifetime_constant: float = None, name: str = 'entity'):
+    def __init__(self, name: str ):
         """
         Constructor for the NetworkEntity class.
 
@@ -21,8 +22,7 @@ class NetworkEntity:
         name (str): The name of the network entity.
         """
         self.name = name
-        self.lifetime_constant = lifetime_constant if lifetime_constant is not None else INF 
-
+        
     @abstractmethod
     def step(self, action: EnergyAction) -> [State, Reward]:
         """
@@ -81,7 +81,7 @@ class NetworkEntity:
         pass
 
 
-    @abstractmethod
+
     def reset(self) -> State:
         """
         Reset the state of the network entity.
@@ -110,11 +110,6 @@ class NetworkEntity:
         spaces: The observation space.
         """
         pass
-
-    @property
-    def get_lifetime(self) -> float:
-        return self.lifetime_constant
-
 
 
 class CompositeNetworkEntity(NetworkEntity):
@@ -148,20 +143,18 @@ class ElementaryNetworkEntity(NetworkEntity):
     This class is an elementary network entity that is composed of other network entities. It provides an interface for stepping through actions,
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
-    def __init__(self, name, energy_dynamics:EnergyDynamics, lifetime_constant: float=INF):
-        super().__init__(lifetime_constant, name)
+    def __init__(self, name, energy_dynamics:EnergyDynamics):
+        super().__init__(name)
         self.energy_dynamics = energy_dynamics
 
-    def step(self, action: ArrayLike) -> [State, Reward]:
+    def step(self, action: ArrayLike):
         state = self.get_current_state()
-        new_state =  self.energy_dynamics.do(action, state, self.lifetime_constant)
+        new_state =  self.energy_dynamics.do(action, state, lifetime_constant=self.lifetime_constant)
         self.update_state(new_state)
-        reward = self.get_reward()
-        return new_state, reward
+        
 
     def predict(self, action: EnergyAction, state: State):
         state = self.get_current_state()
         new_state =  self.energy_dynamics.do(action, state)
-        reward = self.get_reward()
-        return new_state, reward
+        
 

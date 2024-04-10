@@ -18,4 +18,5 @@ INF = float('inf')
 # Define constants for the maximum and minimum exponent values
 MAX_EXPONENT = 200
 MIN_EXPONENT = -200
+DEFAULT_SELF_CONSUMPTION = 0.0
 ###################################################

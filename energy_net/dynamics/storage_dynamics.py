@@ -11,7 +11,7 @@ class BatteryDynamics(StorageDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action: ArrayLike, state:BatteryState, lifetime_constant: float ) -> BatteryState:
+    def do(self, action: ArrayLike, state:BatteryState, *args, **kwargs) -> BatteryState:
         
         """Perform action on battery.
             parameters
@@ -26,6 +26,7 @@ class BatteryDynamics(StorageDynamics):
         """
         assert action.ndim == 1, 'Only one action is allowed'
         value = action[0]
+        lifetime_constant = kwargs.get('lifetime_constant')
         if value is not None:
             new_state = state.copy()
             if value > MIN_CHARGE: # Charge
