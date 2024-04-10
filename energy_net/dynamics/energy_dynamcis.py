@@ -8,11 +8,11 @@ from defs import State
 
 class EnergyDynamics():
     @abstractmethod
-    def do(self, action: ArrayLike, state: np.ndarray, *args, **kwargs):
+    def do(self, action: ArrayLike, state: np.ndarray, **parameters):
         pass
 
     @abstractmethod
-    def predict(self, action: ArrayLike, state: np.ndarray, *args, **kwargs):
+    def predict(self, action: ArrayLike, state: np.ndarray, **parameters):
         pass
 
 

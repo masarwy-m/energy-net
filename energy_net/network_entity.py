@@ -136,6 +136,9 @@ class CompositeNetworkEntity(NetworkEntity):
     def predict(self, action: EnergyAction, state: State):
         predictions = [entity.predict(action, state) for entity in self.sub_entities]
         return self.agg_func(predictions)
+    
+
+    
 
 
 class ElementaryNetworkEntity(NetworkEntity):
@@ -149,12 +152,16 @@ class ElementaryNetworkEntity(NetworkEntity):
 
     def step(self, action: ArrayLike):
         state = self.get_current_state()
-        new_state =  self.energy_dynamics.do(action, state, lifetime_constant=self.lifetime_constant)
+        new_state =  self.energy_dynamics.do(action, state, **self.dynamic_parametrs())
         self.update_state(new_state)
         
 
     def predict(self, action: EnergyAction, state: State):
         state = self.get_current_state()
         new_state =  self.energy_dynamics.do(action, state)
+
+    @abstractmethod
+    def dynamic_parametrs(self):
+        pass
         
 
