@@ -10,11 +10,13 @@ import logging
 
 from network_entity import NetworkEntity
 from defs import EnergyAction
-from env.reward_function import RewardFunction
+from env.reward_function import RewardFunction, HouseholdDummyRewardFunction
 from env.config import DEFAULT_TIME_STEP
+from env.base import Environment, EpisodeTracker
+from utils.env_utils import default_network_entities
 
 
-class EnergyNetEnv(ParallelEnv):
+class EnergyNetEnv(ParallelEnv, Environment):
 
     ##################
     # Pettingzoo API #
@@ -30,11 +32,18 @@ class EnergyNetEnv(ParallelEnv):
         episode_time_steps: int = None, 
         seconds_per_time_step: float = None,
         initial_seed: int = None,
+        reward_function: RewardFunction = None,
         **kwargs: Any):
 
+        # set the root directory
+        self.root_directory = root_directory
+        self.episode_tracker = EpisodeTracker(simulation_start_time_step, simulation_end_time_step)
+        super().__init__(seconds_per_time_step=seconds_per_time_step, random_seed=initial_seed, episode_tracker=self.episode_tracker)
 
-        self.network_entities = network_entities if network_entities is not None else self.default_network_entities()
+
+        self.network_entities = network_entities if network_entities is not None else default_network_entities()
         self.timestep = None
+        self.episode_time_steps = episode_time_steps
         self.simulation_start_time_step = simulation_start_time_step
         self.simulation_end_time_step = simulation_end_time_step
         self.time_step_num = simulation_end_time_step - simulation_start_time_step if simulation_end_time_step is not None and simulation_start_time_step is not None else DEFAULT_TIME_STEP
@@ -50,17 +59,32 @@ class EnergyNetEnv(ParallelEnv):
         self.possible_agents = list(self.entities.keys())
         self.agents = []
         
+        # set reward function
+        self.reward_function = reward_function if reward_function is not None else HouseholdDummyRewardFunction(self.get_metadata())
+
+
+        # reset environment and initializes episode time steps
+        self.reset()
+
+        # reset episode tracker to start after initializing episode time steps during reset
+        self.episode_tracker.reset_episode_index()
 
         self.__observation_space = self.get_observation_space()
         self.__action_space = self.get_action_space()
 
         # state and env objects
         self.__state = None
-
+        # self.__rewards = None
+        # self.__episode_rewards = []
+        
+        
+        
 
 
 
     def reset(self, seed=None, return_info=True, options=None):
+        
+        self.reset_time_step()
         # set seed if given
         if seed is not None:
             self.seed(seed)
@@ -69,10 +93,13 @@ class EnergyNetEnv(ParallelEnv):
 
         # reset agents
         self.agents = self.possible_agents.copy()
-        self.timestep = 0
+        
 
         for entity in self.entities.values():
             entity.reset()
+
+        # reset reward function (does nothing by default)
+        self.reward_function.reset()
 
         # get all observations
         observations = self.__observe_all()
@@ -82,8 +109,7 @@ class EnergyNetEnv(ParallelEnv):
         if not return_info:
             return observations
         else:
-            infos = {agent: {} for agent in self.agents}
-            return observations, infos
+            return observations, self.get_info()
 
     def seed(self, seed=None):
         self.__np_random, seed = seeding.np_random(seed)
@@ -99,28 +125,30 @@ class EnergyNetEnv(ParallelEnv):
         
         rewards = {a: 0 for a in self.agents}
         # Get dummy infos (not used in this example)
-        infos = {a: {} for a in self.agents}
-
+        
+        
         # Get the rewards
         for agent in self.agents:
-            rewards[agent] = self.entities[agent].get_reward()
+            rewards[agent] = self.reward_function.calculate(self.entities[agent].get_current_state())
+        
            
         # get new observations according to the current state
         obs = self.__observe_all()
         self.__action_space = self.get_action_space()
-
-
+        infos = self.get_info()
         # Check if the simulation has reached the end
         truncs = {a: False for a in self.agents}
-        if self.timestep == self.time_step_num:
+        if self.terminated():
             truncs = {a: True for a in self.agents}
+            terminations = {a: True for a in self.agents}
             self.agents = []
 
-        self.timestep += 1
+        self.next_time_step()
         
- 
-
+        
+        # print(terminations, "terminations")
         return obs, rewards, terminations, truncs, infos  
+        # return obs, rewards, self.terminated, truncs, self.get_info() 
     
 
    
@@ -180,10 +208,37 @@ class EnergyNetEnv(ParallelEnv):
         return {name: entity.get_action_space() for name, entity in self.entities.items()}
     
 
-    def default_network_entities(self):
-        from entities.household import default_household
-        household = default_household()
-        return [household]
+    @property
+    def episode_rewards(self):
+        return self.__episode_rewards
+    
+    @episode_rewards.setter
+    def episode_rewards(self, episode_rewards):
+        self.__episode_rewards = episode_rewards
+    
+    @property
+    def rewards(self):
+        """reward time series for each agent"""
+        return self.__rewards
+    
+    @rewards.setter
+    def rewards(self, rewards):
+        self.__rewards = rewards
+
+
+    def terminated(self):
+        return self.time_step == self.simulation_end_time_step - self.simulation_start_time_step - 1
+    
+
+    @property
+    def time_steps(self) -> int:
+        """Number of time steps in current episode split."""
+        return self.episode_tracker.episode_time_steps
+    
+
+
+    def get_info(self):
+        return {agent: {} for agent in self.agents}
         
 
 
