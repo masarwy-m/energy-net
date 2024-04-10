@@ -1,5 +1,7 @@
 from abc import abstractmethod
 from collections import OrderedDict
+from typing import Any, Union
+
 from dynamics.energy_dynamcis import EnergyDynamics
 from utils.utils import AggFunc
 from defs import EnergyAction, State, Reward
@@ -24,7 +26,7 @@ class NetworkEntity:
         self.name = name
         
     @abstractmethod
-    def step(self, action: EnergyAction) -> [State, Reward]:
+    def step(self, action: EnergyAction):
         """
         Perform the given action and return the new state and reward.
 
@@ -37,7 +39,7 @@ class NetworkEntity:
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state: State) -> [State, Reward]:
+    def predict(self, action: EnergyAction, state: State):
         """
         Predict the outcome of performing the given action on the given state.
 
@@ -117,29 +119,38 @@ class CompositeNetworkEntity(NetworkEntity):
     This class is a composite network entity that is composed of other network entities. It provides an interface for stepping through actions,
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
-    def __init__(self, name: str, sub_entities:list[NetworkEntity], agg_func:AggFunc):
+    def __init__(self, name: str, sub_entities:list[NetworkEntity]):
         super().__init__(name)
         self.sub_entities = OrderedDict({entity.name: entity for entity in sub_entities})
-        self.agg_func = agg_func
 
-
-    def step(self, actions):
+    def step(self, actions: Union[np.ndarray, dict[str,Any]]):
+        states= {}
         if type(actions) is np.ndarray:
+            # we convert the entity dict to a list and match action to entities by index
             sub_entities = list(self.sub_entities.values())
             for index , action in enumerate(actions):
-                sub_entities[index].step(np.array([action]))
+                states[sub_entities[index].name] = sub_entities[index].step(np.array([action]))
         else:
             for name, action  in actions.items():
-                self.sub_entities[name].step(action)
+                states[name] = self.sub_entities[name].step(action)
 
+        return states
 
-    def predict(self, action: EnergyAction, state: State):
-        predictions = [entity.predict(action, state) for entity in self.sub_entities]
-        return self.agg_func(predictions)
+    def predict(self, actions: Union[np.ndarray, dict[str,Any]]):
+
+        predicted_states = {}
+        if type(actions) is np.ndarray:
+            # we convert the entity dict to a list and match action to entities by index
+            sub_entities = list(self.sub_entities.values())
+            for index, action in enumerate(actions):
+                predicted_states[sub_entities[index].name] = sub_entities[index].predict(np.array([action]))
+
+        else:
+            for name, action in actions.items():
+                predicted_states[name] = self.sub_entities[name].predict(action)
+
+        return predicted_states
     
-
-    
-
 
 class ElementaryNetworkEntity(NetworkEntity):
     """
@@ -154,11 +165,12 @@ class ElementaryNetworkEntity(NetworkEntity):
         state = self.get_current_state()
         new_state =  self.energy_dynamics.do(action, state, **self.dynamic_parametrs())
         self.update_state(new_state)
-        
+        return {self.name: new_state}
 
     def predict(self, action: EnergyAction, state: State):
         state = self.get_current_state()
-        new_state =  self.energy_dynamics.do(action, state)
+        predicted_state = self.energy_dynamics.predict(action, state)
+        return {self.name: predicted_state}
 
     @abstractmethod
     def dynamic_parametrs(self):

@@ -60,7 +60,8 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.agents = []
         
         # set reward function
-        self.reward_function = reward_function if reward_function is not None else HouseholdDummyRewardFunction(self.get_metadata())
+        # todo: fix this - it should not be a hardcoded variable
+        self.reward_function = reward_function or HouseholdDummyRewardFunction(self.get_metadata())
 
 
         # reset environment and initializes episode time steps
