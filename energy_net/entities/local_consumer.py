@@ -21,12 +21,13 @@ class ConsumerDevice(Device):
         Other keyword arguments used to initialize super class.
     """
     
-    def __init__(self, max_electric_power:float = None, **kwargs: Any):
+    def __init__(self, max_electric_power:float = None, efficiency:float =None, **kwargs: Any):
         super().__init__(**kwargs)
         self.max_electric_power = MAX_ELECTRIC_POWER if max_electric_power is None else max_electric_power
         self.init_max_electric_power = self.max_electric_power
         self.action_type = ConsumeAction
         self.consumption = NO_CONSUMPTION
+        self.efficiency = MAX_EFFICIENCY if efficiency is None else efficiency
 
 
     @property
@@ -42,6 +43,15 @@ class ConsumerDevice(Device):
     def current_state(self) -> ConsumerState:
         return ConsumerState(max_electric_power=self.max_electric_power, efficiency=self.efficiency)
     
+    @property
+    def efficiency(self) -> float:
+        return self._efficiency
+    
+    @efficiency.setter
+    def efficiency(self, efficiency: float):
+        assert efficiency >= MIN_EFFICIENCY, 'efficiency must be >= MIN_EFFICIENCY.'
+        self._efficiency = efficiency
+    
     def get_current_state(self) -> ConsumerState:
         return self.current_state
     
@@ -51,11 +61,7 @@ class ConsumerDevice(Device):
         self.efficiency = state.efficiency
         self.consumption = state.consumption
 
-        
-
-    def get_reward(self):
-        return 0
-    
+  
     def reset(self) -> ConsumerState:
         super().reset()
         self.max_electric_power = self.init_max_electric_power

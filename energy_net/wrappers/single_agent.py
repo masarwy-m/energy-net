@@ -49,7 +49,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
     def step(self, action):
         # step using "joint action" of a single agnet as a dictionary
         step_rets = self.env.step({self.env.agents[0]: action})
-
         # unpack step return values from their dictionaries
         return tuple(next(iter(ret.values())) for ret in step_rets)
 
@@ -61,9 +60,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
     @property  # make property for gym-like access
     def observation_space(self, _=None):  # ignore second argument in API
         # get observation space of the single agent
-        # print(self.env.observation_space(self.env.possible_agents[0]), "Observation Space")
-        # print(self._flatten_action_space(self.env.observation_space(self.env.possible_agents[0])), "Flattened Observation Space")
-        # print(self._flatten_obs(self.env.observation_space(self.env.possible_agents[0])), "Flatten Observation Space")
         return self.env.observation_space(self.env.possible_agents[0])
 
     def seed(self, seed=None):
