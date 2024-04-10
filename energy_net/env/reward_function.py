@@ -1,5 +1,7 @@
 from typing import Any, List, Mapping, Tuple, Union
 from abc import ABC, abstractmethod
+from utils.env_utils import observation_seperator
+from defs import ConsumerState
 
 class RewardFunction(ABC):
     r"""Base and default reward function class.
@@ -41,8 +43,13 @@ class RewardFunction(ABC):
         """
         pass
 
+    def reset(self):
+        """Use to reset variables at the start of an episode."""
 
-class DummyRewardFunction(RewardFunction):
+        pass
+
+
+class HouseholdDummyRewardFunction(RewardFunction):
     r"""Dummy reward function class.
 
     Parameters
@@ -67,7 +74,11 @@ class DummyRewardFunction(RewardFunction):
         -------
         reward: List[float]
             Reward for transition to current timestep.
-        """
-        return [0.0 for _ in observations]
+        """    
+        return sum(d.consumption for d in observation_seperator(observations) if isinstance(d, ConsumerState))
+        
+    
+
+    
     
     
