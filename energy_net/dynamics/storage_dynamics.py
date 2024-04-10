@@ -3,7 +3,7 @@ from dynamics.energy_dynamcis import StorageDynamics
 from defs import  BatteryState
 from numpy.typing import ArrayLike 
 from functools import partial
-from env.config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT
+from config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT
 import numpy as np
 
 
