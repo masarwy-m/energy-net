@@ -1,5 +1,6 @@
 
 import numpy as np
+import importlib
 from typing import List
 from network_entity import NetworkEntity
 from entities.local_storage import Battery
@@ -9,6 +10,7 @@ from dynamics.production_dynmaics import PVDynamics
 from entities.local_consumer import ConsumerDevice
 from dynamics.consumption_dynamic import ElectricHeaterDynamics
 from entities.household import Household
+from reward_function import HouseholdDummyRewardFunction, RewardFunction
 
 
 def observation_seperator(observation:dict[str, np.ndarray]):
@@ -39,6 +41,10 @@ def default_household():
 def default_network_entities() -> List[NetworkEntity]:
         household = default_household()
         return [household]
+
+
+def default_reward(meta_data: dict[str, str])-> RewardFunction:
+    return HouseholdDummyRewardFunction(env_metadata=meta_data)
 
 
 

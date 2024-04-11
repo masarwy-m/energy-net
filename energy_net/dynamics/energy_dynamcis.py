@@ -1,8 +1,10 @@
 from abc import abstractmethod
+
 import sys, os
 from numpy.typing import ArrayLike
 import numpy as np 
 from ..defs import State
+
 
 class EnergyDynamics():
     @abstractmethod
