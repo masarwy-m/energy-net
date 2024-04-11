@@ -1,6 +1,6 @@
 from energy_net.market_entity import MarketEntity
 from energy_net.defs import State, Bid
-from energy_net.utils import condition, get_predicted_state
+from energy_net.utils.utils import condition, get_predicted_state
 
 
 class NetworkManager:

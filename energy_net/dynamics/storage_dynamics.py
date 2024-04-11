@@ -1,10 +1,11 @@
-
-from dynamics.energy_dynamcis import StorageDynamics
-from defs import  BatteryState
-from numpy.typing import ArrayLike 
-from functools import partial
-from config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT
 import numpy as np
+from numpy.typing import ArrayLike
+from functools import partial
+
+
+from .energy_dynamcis import StorageDynamics
+from ..defs import BatteryState
+from ..config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT
 
 
 class BatteryDynamics(StorageDynamics):

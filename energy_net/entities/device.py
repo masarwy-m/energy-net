@@ -2,8 +2,16 @@
 from typing import Any
 import numpy as np
 
-from network_entity import ElementaryNetworkEntity
-from config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF
+import sys
+import os
+
+from energy_net.dynamics.energy_dynamcis import EnergyDynamics
+from .params import DeviceParams
+
+from ..defs import State
+from ..network_entity import ElementaryNetworkEntity
+from ..config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF
+
 np.seterr(divide='ignore', invalid='ignore')
 
 
@@ -23,9 +31,9 @@ class Device(ElementaryNetworkEntity):
         Other keyword arguments used to initialize super class.
     """
 
-    def __init__(self, lifetime_constant: float = None, **kwargs):
+    def __init__(self, device_params:DeviceParams = None, lifetime_constant: float = None, **kwargs):
         super().__init__(**kwargs)
-        self.__lifetime_constant = lifetime_constant if lifetime_constant is not None else INF
+        self.__lifetime_constant = device_params.lifetime_constant if device_params is not None else INF
         
 
     @property

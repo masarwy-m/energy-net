@@ -6,6 +6,12 @@ from entities.device import StorageDevice
 from gymnasium.spaces import Box
 import numpy as np
 from config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
+from typing import NamedTuple
+
+from energy_net.dynamics.energy_dynamcis import EnergyDynamics
+
+
+
 
 
 class Battery(StorageDevice):
