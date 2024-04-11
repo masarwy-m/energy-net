@@ -1,5 +1,6 @@
+from typing import Any, Union
 
-from network_entity import NetworkEntity, CompositeNetworkEntity 
+from network_entity import NetworkEntity, CompositeNetworkEntity
 from entities.device import StorageDevice
 from utils.utils import AggFunc, get_value_by_type
 from defs import EnergyAction, State
@@ -8,15 +9,17 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 
+#return Household(name='test_household',  agg_func=lambda x: x)
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
     The household entity is responsible for managing the sub-entities and aggregating the reward.
     """
-    def __init__(self, name: str = None, sub_entities:list[NetworkEntity] = None, agg_func:AggFunc = None):
-        super().__init__(name, sub_entities, agg_func)
-        
-        
+    def __init__(self, name: str = None, sub_entities:list[NetworkEntity] = None):
+        super().__init__(name, sub_entities)
+
+    def step(self, actions: Union[np.ndarray, dict[str,Any]]):
+        pass
         
 
     def get_current_state(self):

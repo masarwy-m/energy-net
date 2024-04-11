@@ -33,7 +33,7 @@ def default_household():
                     discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery')
     pv = PrivateProducer(max_produce=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv')
     load = ConsumerDevice(max_electric_power=100, energy_dynamics=ElectricHeaterDynamics(), name='test_heater')
-    return Household(name='test_household', sub_entities=[battery, pv, load], agg_func=lambda x: x) 
+    return Household(name='test_household', sub_entities=[battery, pv, load])
 
 
 def default_network_entities() -> List[NetworkEntity]:
