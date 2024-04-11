@@ -1,10 +1,7 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
 from typing import Any
 import numpy as np
-import sys
-import os
-sys.path.append(os.path.abspath('../network_entity.py'))
-from defs import State
+
 from network_entity import ElementaryNetworkEntity
 from config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF
 np.seterr(divide='ignore', invalid='ignore')

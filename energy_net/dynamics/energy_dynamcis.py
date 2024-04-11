@@ -1,9 +1,7 @@
 from abc import abstractmethod
-import sys
-import os
 from numpy.typing import ArrayLike
 import numpy as np 
-sys.path.append(os.path.abspath('../defs.py'))
+
 from defs import State
 
 class EnergyDynamics():

@@ -1,6 +1,6 @@
+import importlib
 from typing import Any, List, Mapping, Tuple, Union
 from abc import ABC, abstractmethod
-from utils.env_utils import observation_seperator
 from defs import ConsumerState
 
 class RewardFunction(ABC):
@@ -74,7 +74,8 @@ class HouseholdDummyRewardFunction(RewardFunction):
         -------
         reward: List[float]
             Reward for transition to current timestep.
-        """    
+        """
+        observation_seperator = importlib.import_module('utils.env_utils').observation_seperator
         return sum(d.consumption for d in observation_seperator(observations) if isinstance(d, ConsumerState))
         
     

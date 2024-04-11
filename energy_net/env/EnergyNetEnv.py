@@ -13,7 +13,7 @@ from defs import EnergyAction
 from reward_function import RewardFunction, HouseholdDummyRewardFunction
 from config import DEFAULT_TIME_STEP
 from env.base import Environment, EpisodeTracker
-from utils.env_utils import default_network_entities
+from utils.env_utils import default_network_entities, default_reward
 
 
 
@@ -62,8 +62,8 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.agents = []
         
         # set reward function
-        # todo: fix this - it should not be a hardcoded variable
-        self.reward_function = reward_function or HouseholdDummyRewardFunction(self.get_metadata())
+        
+        self.reward_function = reward_function if reward_function is not None else default_reward(meta_data=self.get_metadata())
 
 
         # reset environment and initializes episode time steps
