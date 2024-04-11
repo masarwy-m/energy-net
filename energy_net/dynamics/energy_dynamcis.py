@@ -1,10 +1,8 @@
 from abc import abstractmethod
-import sys
-import os
+import sys, os
 from numpy.typing import ArrayLike
 import numpy as np 
-sys.path.append(os.path.abspath('../defs.py'))
-from defs import State
+from ..defs import State
 
 class EnergyDynamics():
     @abstractmethod

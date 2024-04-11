@@ -1,5 +1,5 @@
-from dynamics.energy_dynamcis import  ProductionDynamics
-from defs import  ProducerState
+from ..dynamics.energy_dynamcis import  ProductionDynamics
+from ..defs import  ProducerState
 from numpy.typing import ArrayLike
 
 class PVDynamics(ProductionDynamics):

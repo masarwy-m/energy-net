@@ -1,10 +1,12 @@
+
+from .dynamics.energy_dynamcis import EnergyDynamics
+from .utils.utils import AggFunc
+from .defs import EnergyAction, State, Reward
+
+
 from abc import abstractmethod
 from collections import OrderedDict
 from typing import Any, Union
-
-from dynamics.energy_dynamcis import EnergyDynamics
-from utils.utils import AggFunc
-from defs import EnergyAction, State, Reward
 from gymnasium import spaces
 import numpy as np
 from numpy.typing import ArrayLike
@@ -16,7 +18,7 @@ class NetworkEntity:
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
 
-    def __init__(self, name: str ):
+    def __init__(self, name: str):
         """
         Constructor for the NetworkEntity class.
 
@@ -24,7 +26,7 @@ class NetworkEntity:
         name (str): The name of the network entity.
         """
         self.name = name
-        
+
     @abstractmethod
     def step(self, action: EnergyAction):
         """
@@ -51,7 +53,7 @@ class NetworkEntity:
         list: The predicted new state and reward after performing the action.
         """
         pass
-    
+
     @abstractmethod
     def get_current_state(self) -> State:
         """
@@ -81,8 +83,6 @@ class NetworkEntity:
         Reward: The current reward.
         """
         pass
-
-
 
     def reset(self) -> State:
         """
@@ -119,24 +119,31 @@ class CompositeNetworkEntity(NetworkEntity):
     This class is a composite network entity that is composed of other network entities. It provides an interface for stepping through actions,
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
-    def __init__(self, name: str, sub_entities:list[NetworkEntity]):
+
+    def __init__(self, name: str, sub_entities: list[NetworkEntity] = None, agg_func: AggFunc = None):
         super().__init__(name)
         self.sub_entities = OrderedDict({entity.name: entity for entity in sub_entities})
+        self.agg_func = agg_func
 
-    def step(self, actions: Union[np.ndarray, dict[str,Any]]):
-        states= {}
+    def step(self, actions: Union[np.ndarray, dict[str, Any]]):
+        states = {}
         if type(actions) is np.ndarray:
             # we convert the entity dict to a list and match action to entities by index
             sub_entities = list(self.sub_entities.values())
-            for index , action in enumerate(actions):
+            for index, action in enumerate(actions):
                 states[sub_entities[index].name] = sub_entities[index].step(np.array([action]))
+
         else:
-            for name, action  in actions.items():
+            for name, action in actions.items():
                 states[name] = self.sub_entities[name].step(action)
 
-        return states
+        if self.agg_func:
+            agg_value = self.agg_func(states)
+            return agg_value
+        else:
+            return states
 
-    def predict(self, actions: Union[np.ndarray, dict[str,Any]]):
+    def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
 
         predicted_states = {}
         if type(actions) is np.ndarray:
@@ -149,21 +156,26 @@ class CompositeNetworkEntity(NetworkEntity):
             for name, action in actions.items():
                 predicted_states[name] = self.sub_entities[name].predict(action)
 
-        return predicted_states
-    
+        if self.agg_func:
+            agg_value = self.agg_func(predicted_states)
+            return agg_value
+        else:
+            return predicted_states
+
 
 class ElementaryNetworkEntity(NetworkEntity):
     """
     This class is an elementary network entity that is composed of other network entities. It provides an interface for stepping through actions,
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
-    def __init__(self, name, energy_dynamics:EnergyDynamics):
+
+    def __init__(self, name, energy_dynamics: EnergyDynamics):
         super().__init__(name)
         self.energy_dynamics = energy_dynamics
 
     def step(self, action: ArrayLike):
         state = self.get_current_state()
-        new_state =  self.energy_dynamics.do(action, state, **self.dynamic_parametrs())
+        new_state = self.energy_dynamics.do(action, state, **self.dynamic_parametrs())
         self.update_state(new_state)
         return {self.name: new_state}
 
@@ -175,5 +187,3 @@ class ElementaryNetworkEntity(NetworkEntity):
     @abstractmethod
     def dynamic_parametrs(self):
         pass
-        
-

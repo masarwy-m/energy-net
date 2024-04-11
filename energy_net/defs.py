@@ -1,6 +1,6 @@
 from typing import Callable, Any, TypedDict, Optional
 import numpy as np
-from config import MIN_PRODUCTION, NO_CONSUMPTION
+from .config import MIN_PRODUCTION, NO_CONSUMPTION
 
 
 # EnergyAction = dict[str, Any]

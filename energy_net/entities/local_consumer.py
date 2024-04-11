@@ -1,9 +1,11 @@
-from entities.device import Device
 from typing import Any
-from defs import ConsumerState, ConsumeAction
-from config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 from gymnasium.spaces import Box
 import numpy as np
+
+
+from ..entities.device import Device
+from ..defs import ConsumerState, ConsumeAction
+from ..config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 
 
 class ConsumerDevice(Device):
@@ -25,9 +27,9 @@ class ConsumerDevice(Device):
         super().__init__(**kwargs)
         self.max_electric_power = MAX_ELECTRIC_POWER if max_electric_power is None else max_electric_power
         self.init_max_electric_power = self.max_electric_power
-        self.action_type = ConsumeAction
         self.consumption = NO_CONSUMPTION
         self.efficiency = MAX_EFFICIENCY if efficiency is None else efficiency
+        self.action_type = ConsumeAction
 
 
     @property

@@ -1,5 +1,5 @@
-from dynamics.energy_dynamcis import ConsumptionDynamics
-from defs import ConsumerState
+from ..dynamics.energy_dynamcis import ConsumptionDynamics
+from ..defs import ConsumerState
 from numpy.typing import ArrayLike
 
 
