@@ -1,8 +1,24 @@
-from ..dynamics.energy_dynamcis import ConsumptionDynamics
-from ..defs import ConsumerState
 from numpy.typing import ArrayLike
 
+from ..dynamics.energy_dynamcis import ConsumptionDynamics
+from ..defs import ConsumerState
 
+
+class HouseholdConsumptionDynamics(ConsumptionDynamics):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def do(self, action: ArrayLike, state: ConsumerState, **parameters) -> float:
+        pass
+
+    def predict(self, action, params, state):
+        pass
+
+    def get_current_consumption_capability(self):
+        pass
+
+    def predict_consumption_capability(self, state):
+        pass
 class ElectricHeaterDynamics(ConsumptionDynamics):
     def __init__(self) -> None:
         super().__init__()

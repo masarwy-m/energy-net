@@ -1,7 +1,7 @@
 import importlib
 from typing import Any, List, Mapping, Tuple, Union
 from abc import ABC, abstractmethod
-from defs import ConsumerState
+from .defs import ConsumerState
 
 class RewardFunction(ABC):
     r"""Base and default reward function class.

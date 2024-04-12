@@ -1,7 +1,6 @@
 from abc import abstractmethod
-from energy_net.defs import State, Bid, EnergyAction, Reward
-from energy_net.dynamics.energy_dynamcis import ProductionDynamics
-from energy_net.network_entity import NetworkEntity
+from .defs import State, Bid, EnergyAction, Reward
+from .network_entity import NetworkEntity
 
 class MarketEntity():
     def __init__(self, name, network_entity:NetworkEntity):

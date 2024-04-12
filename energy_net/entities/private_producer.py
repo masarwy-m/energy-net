@@ -1,9 +1,11 @@
-from entities.device import Device
 from typing import Any
-from defs import ProducerState, ProduceAction
-from gymnasium.spaces import Box
-from config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
 import numpy as np
+from gymnasium.spaces import Box
+
+from .device import Device
+from .params import ProductionParams
+from ..defs import ProducerState, ProduceAction
+from ..config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
 
 class PrivateProducer(Device):
     """Base producer class.
@@ -20,26 +22,26 @@ class PrivateProducer(Device):
         Other keyword arguments used to initialize super class.
     """
     
-    def __init__(self, self_consumption: float =None, max_produce: float = None, efficiency: float = None, **kwargs: Any):
-        super().__init__(efficiency, **kwargs)
-        self.max_produce = max_produce
-        self.init_max_produce = self.max_produce
-        self.action_type = ProduceAction
+    def __init__(self, production_params:ProductionParams):
+        super().__init__(production_params)
+        self.max_production = production_params["max_production"]
+        self.init_max_production = self.max_production
         self.production = MIN_PRODUCTION
-        self.self_consumption = self_consumption if self_consumption is not None else DEFAULT_SELF_CONSUMPTION  # self consumption
+        self.self_consumption = production_params["self_consumption"] if "self_consumption" in production_params  else DEFAULT_SELF_CONSUMPTION  # self consumption
+        self.action_type = ProduceAction
 
     @property
     def current_state(self) -> ProducerState:
         return ProducerState(max_produce=self.max_produce, production=self.production)
 
     @property
-    def max_produce(self):
-        return self._max_produce
+    def max_production(self):
+        return self._max_production
     
-    @max_produce.setter
-    def max_produce(self, max_produce: float):
-        assert max_produce >= MIN_POWER, 'max_produce must be >= MIN_POWER.'
-        self._max_produce = max_produce
+    @max_production.setter
+    def max_production(self, max_production: float):
+        assert max_production >= MIN_POWER, 'max_production must be >= MIN_POWER.'
+        self._max_production = max_production
 
 
 
@@ -49,7 +51,7 @@ class PrivateProducer(Device):
     
     @production.setter
     def production(self, production: float):
-        assert MIN_PRODUCTION <= production <= self.max_produce, 'production must be in [MIN_PRODUCTION, MAX_PRODUCTION].'
+        assert MIN_PRODUCTION <= production <= self.max_production, 'production must be in [MIN_PRODUCTION, MAX_PRODUCTION].'
         self._production = production
 
 
@@ -57,7 +59,7 @@ class PrivateProducer(Device):
         return self.current_state
     
     def update_state(self, state: ProducerState):
-        self.max_produce = state.max_produce
+        self.max_production = state.max_production
         self.production = state.production
         
     
@@ -66,16 +68,16 @@ class PrivateProducer(Device):
     
     def reset(self):
         super().reset()
-        self.max_produce = self.init_max_produce
+        self.max_production = self.init_max_production
         return self.get_current_state()
 
     def get_action_space(self) -> Box:
-        return Box(low=MIN_POWER, high=self.max_produce, shape=(1,), dtype=np.float32)
+        return Box(low=MIN_POWER, high=self.max_production, shape=(1,), dtype=np.float32)
 
     def get_observation_space(self) -> Box :
         # Define the lower and upper bounds for each dimension of the observation space
         low = np.array([MIN_POWER, MIN_POWER])  # Example lower bounds
-        high = np.array([self.max_produce, MAX_ELECTRIC_POWER])  # Example upper bounds
+        high = np.array([self.max_production, MAX_ELECTRIC_POWER])  # Example upper bounds
         return Box(low=low, high=high, dtype=np.float32)
 
 
