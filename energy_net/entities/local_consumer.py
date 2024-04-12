@@ -6,16 +6,15 @@ import numpy as np
 from ..entities.device import Device
 from ..defs import ConsumerState, ConsumeAction
 from ..config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
-
+from .params import ConsumptionParams
 
 class ConsumerDevice(Device):
     """Base consumer class.
-
     Parameters
     ----------
     max_electric_power : float, default: None
         Maximum amount of electric power that the electric heater can consume from the power grid.
-    
+
 
     Other Parameters
     ----------------
@@ -23,12 +22,12 @@ class ConsumerDevice(Device):
         Other keyword arguments used to initialize super class.
     """
     
-    def __init__(self, max_electric_power:float = None, efficiency:float =None, **kwargs: Any):
-        super().__init__(**kwargs)
-        self.max_electric_power = MAX_ELECTRIC_POWER if max_electric_power is None else max_electric_power
+    def __init__(self, consumptionParams:ConsumptionParams):
+        super().__init__()
+        self.efficiency = MAX_EFFICIENCY if consumptionParams.efficiency is None else consumptionParams.efficiency
+        self.max_electric_power = MAX_ELECTRIC_POWER if consumptionParams.max_electric_power is None else consumptionParams.max_electric_power
         self.init_max_electric_power = self.max_electric_power
         self.consumption = NO_CONSUMPTION
-        self.efficiency = MAX_EFFICIENCY if efficiency is None else efficiency
         self.action_type = ConsumeAction
 
 

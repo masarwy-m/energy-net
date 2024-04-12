@@ -3,7 +3,7 @@ import sys
 import os
 import warnings
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../energy_net')))
 
 import unittest
 from defs import EnergyAction, ChargeAction, ProduceAction, ConsumeAction

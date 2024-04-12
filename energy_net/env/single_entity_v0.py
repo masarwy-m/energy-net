@@ -1,6 +1,5 @@
-
 from . import energy_net_v0 as __energy_net_v0
-from wrappers.single_agent import SingleEntityWrapper as __SingleEntityWrapper
+from ..wrappers.single_agent import SingleEntityWrapper as __SingleEntityWrapper
 
 
 def gym_env(*args, **kwargs):

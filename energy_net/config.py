@@ -19,4 +19,5 @@ INF = float('inf')
 MAX_EXPONENT = 200
 MIN_EXPONENT = -200
 DEFAULT_SELF_CONSUMPTION = 0.0
+DEFAULT_LIFETIME_CONSTANT = 0.0
 ###################################################

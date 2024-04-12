@@ -1,4 +1,4 @@
-from energy_net.network_entity import CompositeNetworkEntity
+from .network_entity import CompositeNetworkEntity
 
 
 class Network(CompositeNetworkEntity):

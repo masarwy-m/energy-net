@@ -4,7 +4,7 @@ import os
 import warnings
 
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../energy_net')))
 from env.single_entity_v0 import gym_env
 from common import single_agent_cfgs
 

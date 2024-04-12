@@ -1,4 +1,3 @@
-
 from pettingzoo.utils import BaseParallelWrapper
 from pettingzoo.utils.env_logger import EnvLogger
 from typing import Any

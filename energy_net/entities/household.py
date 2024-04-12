@@ -4,29 +4,38 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from ..defs import EnergyAction, State
-from ..network_entity import NetworkEntity, CompositeNetworkEntity
+from ..dynamics.energy_dynamcis import ConsumptionDynamics
+from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
 from ..entities.device import StorageDevice
 from ..utils.utils import AggFunc, get_value_by_type
-from energy_net.dynamics.consumption_dynamic import ElectricHeaterDynamics
-from energy_net.dynamics.production_dynmaics import PVDynamics
-from energy_net.dynamics.storage_dynamics import BatteryDynamics
-from energy_net.entities.local_consumer import ConsumerDevice
-from energy_net.entities.local_storage import Battery
-from energy_net.entities.params import StorageParams, ProductionParams, LoadParams
-from energy_net.entities.private_producer import PrivateProducer
+from ..dynamics.consumption_dynamic import ElectricHeaterDynamics
+from ..dynamics.production_dynmaics import PVDynamics
+from ..dynamics.storage_dynamics import BatteryDynamics
+from ..entities.local_consumer import ConsumerDevice
+from ..entities.local_storage import Battery
+from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
+from ..entities.private_producer import PrivateProducer
+
+
+class HouseholdConsumption(ElementaryNetworkEntity):
+    def __init__(self, consumption_dynamics:ConsumptionDynamics):
+        super().__init__(consumption_dynamics['name'], consumption_dynamics)
+
+
+
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
     The household entity is responsible for managing the sub-entities and aggregating the reward.
     """
 
-    def __init__(self, name: str, device_params_dict:dict[str,LoadParams], storage_params_dict:dict[str,StorageParams], production_params_dict:dict[str,ProductionParams]):
+    def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams], storage_params_dict:dict[str,StorageParams], production_params_dict:dict[str,ProductionParams], agg_func=None):
 
         # initialize consumer devices (non-shiftable loads)
-        self.device_array = []
-        for device_params in device_params_dict:
-            device = ConsumerDevice(device_params)
-            self.device_array.append(device)
+        self.consumption_array = []
+        for consumption_params in consumption_params_dict:
+            device = HouseholdConsumption(consumption_params)
+            self.consumption_array.append(device)
 
         # initialize storage devices
         self.storage_array = []
@@ -40,7 +49,9 @@ class Household(CompositeNetworkEntity):
             device = PrivateProducer(production_params)
             self.production_array.append(device)
 
-        super().__init__(name=name, sub_entities=[self.device_array+self.storage_array+self.production_array])
+        sub_entities = self.consumption_array+ self.storage_array+ self.production_array
+
+        super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 
     def step(self, actions: Union[np.ndarray, dict[str, Any]]):
         print('step in household')

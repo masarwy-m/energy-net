@@ -1,14 +1,13 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
 
-from typing import Any, TypedDict
-from defs import BatteryState, ChargeAction
-from entities.device import StorageDevice
+from typing import Any
 from gymnasium.spaces import Box
 import numpy as np
-from config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
-from typing import NamedTuple
 
-from energy_net.dynamics.energy_dynamcis import EnergyDynamics
+from .params import StorageParams
+from ..defs import BatteryState, ChargeAction
+from .device import StorageDevice
+from ..config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
 
 
 
@@ -16,35 +15,9 @@ from energy_net.dynamics.energy_dynamcis import EnergyDynamics
 
 class Battery(StorageDevice):
     """Base electricity storage class.
-
-    Parameters
-    ----------
-    energy_capacity : float, default: inf
-        Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
-    power_capacity : float, default: inf
-        Maximum amount of power the storage device can store in [kW]. Must be >= 0.
-    state_of_charge : float, default: 0.0
-        Current state of charge of the storage device in [kWh]. Must be >= 0.
-    charging_efficiency : float, default: 1.0
-        Charging efficiency of the storage device. Must be > 0.
-    discharging_efficiency : float, default: 1.0
-        Discharging efficiency of the storage device. Must be > 0.
-    lifetime_constant : float, default: inf
-        Lifetime constant of the storage device in years. Must be > 0.
-    energy_dynamics : Dynamics, default: None
-        Energy dynamics of the storage device. Must be a subclass of Dynamics.
-    name : str, default: None
-        Name of the storage device. Must be a string.
-
-
-    
-    Other Parameters
-    ----------------
-    **kwargs : Any
-        Other keyword arguments used to initialize super classes.
     """
-    def __init__(self, **kwargs: Any):
-        super().__init__(**kwargs)
+    def __init__(self, storage_params:StorageParams):
+        super().__init__(storage_params)
         self.action_type = ChargeAction
         self.current_time = INITIAL_TIME
 

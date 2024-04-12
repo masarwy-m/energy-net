@@ -1,16 +1,15 @@
 
 import numpy as np
-import importlib
 from typing import List
-from network_entity import NetworkEntity
-from entities.local_storage import Battery
-from dynamics.storage_dynamics import BatteryDynamics
-from entities.private_producer import PrivateProducer
-from dynamics.production_dynmaics import PVDynamics
-from entities.local_consumer import ConsumerDevice
-from dynamics.consumption_dynamic import ElectricHeaterDynamics
-from entities.household import Household
-from reward_function import HouseholdDummyRewardFunction, RewardFunction
+from ..network_entity import NetworkEntity
+from ..entities.local_storage import Battery
+from ..dynamics.storage_dynamics import BatteryDynamics
+from ..entities.private_producer import PrivateProducer
+from ..dynamics.production_dynmaics import PVDynamics
+from ..entities.local_consumer import ConsumerDevice
+from ..dynamics.consumption_dynamic import ElectricHeaterDynamics
+from ..entities.household import Household
+from ..reward_function import HouseholdDummyRewardFunction, RewardFunction
 
 
 def observation_seperator(observation:dict[str, np.ndarray]):
