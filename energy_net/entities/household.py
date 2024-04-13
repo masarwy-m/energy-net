@@ -54,7 +54,7 @@ class Household(CompositeNetworkEntity):
         super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 
     def step(self, actions: Union[np.ndarray, dict[str, Any]]):
-        print('step in household')
+        super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
         print('step in household')
