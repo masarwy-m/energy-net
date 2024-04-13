@@ -23,9 +23,9 @@ class ConsumerDevice(Device):
     """
     
     def __init__(self, consumptionParams:ConsumptionParams):
-        super().__init__()
-        self.efficiency = MAX_EFFICIENCY if consumptionParams.efficiency is None else consumptionParams.efficiency
-        self.max_electric_power = MAX_ELECTRIC_POWER if consumptionParams.max_electric_power is None else consumptionParams.max_electric_power
+        super().__init__(consumptionParams)
+        self.max_electric_power = MAX_ELECTRIC_POWER if consumptionParams["max_electric_power"] is None else consumptionParams["max_electric_power"]
+        self.efficiency = MAX_EFFICIENCY if consumptionParams["efficiency"] is None else consumptionParams["efficiency"]
         self.init_max_electric_power = self.max_electric_power
         self.consumption = NO_CONSUMPTION
         self.action_type = ConsumeAction

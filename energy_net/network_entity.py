@@ -122,17 +122,18 @@ class CompositeNetworkEntity(NetworkEntity):
         self.sub_entities = OrderedDict({entity.name: entity for entity in sub_entities})
         self.agg_func = agg_func
 
-    def step(self, actions: Union[np.ndarray, dict[str, Any]]):
+    def step(self, actions: Union[np.ndarray, dict[str, EnergyAction]]):
+
         states = {}
         if type(actions) is np.ndarray:
             # we convert the entity dict to a list and match action to entities by index
             sub_entities = list(self.sub_entities.values())
-            for index, action in enumerate(actions):
-                states[sub_entities[index].name] = sub_entities[index].step(np.array([action]))
+            for entity_index, action in enumerate(actions):
+                states[sub_entities[entity_index].name] = sub_entities[entity_index].step(np.array([action]))
 
         else:
-            for name, action in actions.items():
-                states[name] = self.sub_entities[name].step(action)
+            for entity_name, action in actions.items():
+                states[entity_name] = self.sub_entities[entity_name].step(action)
 
         if self.agg_func:
             agg_value = self.agg_func(states)
@@ -140,18 +141,18 @@ class CompositeNetworkEntity(NetworkEntity):
         else:
             return states
 
-    def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
+    def predict(self, actions: Union[np.ndarray, dict[str, EnergyAction]]):
 
         predicted_states = {}
         if type(actions) is np.ndarray:
             # we convert the entity dict to a list and match action to entities by index
             sub_entities = list(self.sub_entities.values())
-            for index, action in enumerate(actions):
-                predicted_states[sub_entities[index].name] = sub_entities[index].predict(np.array([action]))
+            for entity_index, action in enumerate(actions):
+                predicted_states[sub_entities[entity_index].name] = sub_entities[entity_index].predict(np.array([action]))
 
         else:
-            for name, action in actions.items():
-                predicted_states[name] = self.sub_entities[name].predict(action)
+            for entity_name, action in actions.items():
+                predicted_states[entity_name] = self.sub_entities[entity_name].predict(action)
 
         if self.agg_func:
             agg_value = self.agg_func(predicted_states)

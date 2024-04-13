@@ -4,6 +4,7 @@ import warnings
 
 import numpy as np
 
+from energy_net.defs import EnergyAction, ProduceAction, ChargeAction, ConsumeAction
 from energy_net.dynamics.consumption_dynamic import HouseholdConsumptionDynamics
 from energy_net.dynamics.production_dynmaics import PVDynamics
 from energy_net.dynamics.storage_dynamics import BatteryDynamics
@@ -37,7 +38,10 @@ def test_household():
         household = Household(name="test_household", consumption_params_dict=consumption_params_arr, storage_params_dict=storage_params_arr, production_params_dict=production_params_arr, agg_func= lambda nums: sum(nums))
 
         # perform test action
-        household.step({'test_battery': np.array([90]), 'household_consumption': np.array([10]), 'test_pv': np.array([100])})
+        chargeAction  =  EnergyAction(produce=None, consume=None, charge=ChargeAction(charge=10))
+        consumeAction =  EnergyAction(produce=ProduceAction(produce=10), consume=None, charge=None)
+        produceAction =  EnergyAction(produce=None, consume=ConsumeAction(consume=100), charge=None)
+        household.step({'test_battery':chargeAction, 'household_consumption':consumeAction, 'test_pv': produceAction})
 
         # initialize pettingzoo environment wrapper
         '''

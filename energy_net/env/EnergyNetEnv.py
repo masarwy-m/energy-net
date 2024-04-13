@@ -6,7 +6,7 @@ from pettingzoo import ParallelEnv
 
 from ..network_entity import NetworkEntity
 from ..defs import EnergyAction
-from ..reward_function import RewardFunction, HouseholdDummyRewardFunction
+from ..reward_function import RewardFunction
 from ..config import DEFAULT_TIME_STEP
 from ..env.base import Environment, EpisodeTracker
 from ..utils.env_utils import default_network_entities, default_reward

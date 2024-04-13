@@ -4,7 +4,7 @@ import numpy as np
 
 from .params import DeviceParams, StorageParams
 from ..network_entity import ElementaryNetworkEntity
-from ..config import NO_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF, \
+from ..config import DEFAULT_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF, \
     DEFAULT_LIFETIME_CONSTANT
 
 np.seterr(divide='ignore', invalid='ignore')
@@ -30,7 +30,7 @@ class Device(ElementaryNetworkEntity):
 
     
     def dynamic_parametrs(self):
-        return { 'lifetime_constant': self.lifetime_constant }
+        return { 'lifetime_constant': self.__lifetime_constant }
         
 
     
@@ -81,7 +81,7 @@ class StorageDevice(Device):
     
     @charging_efficiency.setter
     def charging_efficiency(self, charging_efficiency: float):
-        charging_efficiency = NO_EFFICIENCY if charging_efficiency is None else charging_efficiency
+        charging_efficiency = DEFAULT_EFFICIENCY if charging_efficiency is None else charging_efficiency
         assert charging_efficiency > MIN_EFFICIENCY, 'charging_efficiency must be > 0.'
         self.__charging_efficiency = charging_efficiency
 
@@ -93,7 +93,7 @@ class StorageDevice(Device):
     
     @discharging_efficiency.setter
     def discharging_efficiency(self, discharging_efficiency: float):
-        discharging_efficiency = NO_EFFICIENCY if discharging_efficiency is None else discharging_efficiency
+        discharging_efficiency = DEFAULT_EFFICIENCY if discharging_efficiency is None else discharging_efficiency
         assert discharging_efficiency > MIN_EFFICIENCY, 'discharging_efficiency must be > 0.'
         self.__discharging_efficiency = discharging_efficiency
 

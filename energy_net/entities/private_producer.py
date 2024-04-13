@@ -32,7 +32,7 @@ class PrivateProducer(Device):
 
     @property
     def current_state(self) -> ProducerState:
-        return ProducerState(max_produce=self.max_produce, production=self.production)
+        return ProducerState(max_produce=self.max_production, production=self.production)
 
     @property
     def max_production(self):

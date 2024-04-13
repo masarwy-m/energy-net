@@ -29,27 +29,28 @@ class Household(CompositeNetworkEntity):
     The household entity is responsible for managing the sub-entities and aggregating the reward.
     """
 
-    def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams], storage_params_dict:dict[str,StorageParams], production_params_dict:dict[str,ProductionParams], agg_func=None):
+    def __init__(self, name: str, sub_entities: list[NetworkEntity] = None, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
 
-        # initialize consumer devices (non-shiftable loads)
-        self.consumption_array = []
-        for consumption_params in consumption_params_dict:
-            device = HouseholdConsumption(consumption_params)
-            self.consumption_array.append(device)
+        if sub_entities is None:
+            # initialize consumer devices (non-shiftable loads)
+            self.consumption_array = []
+            for consumption_params in consumption_params_dict:
+                device = HouseholdConsumption(consumption_params)
+                self.consumption_array.append(device)
 
-        # initialize storage devices
-        self.storage_array = []
-        for storage_params in storage_params_dict:
-            device = Battery(storage_params)
-            self.storage_array.append(device)
+            # initialize storage devices
+            self.storage_array = []
+            for storage_params in storage_params_dict:
+                device = Battery(storage_params)
+                self.storage_array.append(device)
 
-        # initialize production devices
-        self.production_array = []
-        for production_params in production_params_dict:
-            device = PrivateProducer(production_params)
-            self.production_array.append(device)
+            # initialize production devices
+            self.production_array = []
+            for production_params in production_params_dict:
+                device = PrivateProducer(production_params)
+                self.production_array.append(device)
 
-        sub_entities = self.consumption_array+ self.storage_array+ self.production_array
+            sub_entities = self.consumption_array+ self.storage_array+ self.production_array
 
         super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 

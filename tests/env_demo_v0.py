@@ -2,11 +2,43 @@
 import sys
 import os
 import warnings
+from typing import Mapping, List, Union, Any
 
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../energy_net')))
-from env.single_entity_v0 import gym_env
-from common import single_agent_cfgs
+from energy_net.env.single_entity_v0 import gym_env
+from energy_net.reward_function import RewardFunction
+from tests.common import single_agent_cfgs
+
+
+class HouseholdDummyRewardFunction(RewardFunction):
+    r"""Dummy reward function class.
+
+    Parameters
+    ----------
+    env_metadata: Mapping[str, Any]:
+        General static information about the environment.
+    **kwargs : dict
+        Other keyword arguments for custom reward calculation.
+    """
+
+    def __init__(self, env_metadata: Mapping[str, Any], **kwargs):
+        super().__init__(env_metadata, **kwargs)
+
+    def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
+        r"""Calculates reward.
+
+        Parameters
+        ----------
+        observations: List[Mapping[str, Union[int, float]]]
+
+        Returns
+        -------
+        reward: List[float]
+            Reward for transition to current timestep.
+        """
+        # observation_seperator = importlib.import_module('utils.env_utils').observation_seperator
+        return sum(d.consumption for d in observation_seperator(observations) if isinstance(d, ConsumerState))
+
 
 def test_gym_api():
     with warnings.catch_warnings():
