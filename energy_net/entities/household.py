@@ -3,6 +3,7 @@ from gymnasium.spaces import Dict
 import numpy as np
 from numpy.typing import ArrayLike
 
+from ..config import INITIAL_TIME
 from ..model.energy_action import EnergyAction
 from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
@@ -35,7 +36,7 @@ class Household(CompositeNetworkEntity):
             # initialize storage devices
             self.storage_array = []
             for storage_params in storage_params_dict:
-                device = Battery(storage_params)
+                device = Battery(init_time=INITIAL_TIME, storage_params=storage_params)
                 self.storage_array.append(device)
 
             # initialize production devices

@@ -2,16 +2,17 @@ import numpy as np
 from functools import partial
 
 from .energy_dynamcis import StorageDynamics
-from ..model.state import BatteryState
-from ..model.energy_action import StorageAction
+from ..model.state import StorageState
+from ..model.energy_action import StorageAction, EnergyAction
 from ..config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT, DEFAULT_LIFETIME_CONSTANT
+from ..utils.utils import move_time_tick
 
 
 class BatteryDynamics(StorageDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action: StorageAction, state:BatteryState, **parameters) -> BatteryState:
+    def do(self, action: EnergyAction, state: StorageState=None, params= None) -> StorageState:
         
         """Perform action on battery.
             parameters
@@ -26,26 +27,26 @@ class BatteryDynamics(StorageDynamics):
         """
         value = action["charge"]
         lifetime_constant = DEFAULT_LIFETIME_CONSTANT
-        if 'lifetime_constant' in parameters:
-            lifetime_constant = parameters.get('lifetime_constant')
+        if params and 'lifetime_constant' in params:
+            lifetime_constant = params.get('lifetime_constant')
         if value is not None:
             new_state = state.copy()
             if value > MIN_CHARGE: # Charge
-                new_state.state_of_charge = min(state.state_of_charge + value, state.energy_capacity)
+                new_state['state_of_charge'] = min(state['state_of_charge'] + value, state['energy_capacity'])
             else: # Discharge
-                new_state.state_of_charge = max(state.state_of_charge + value, MIN_CHARGE)
+                new_state['state_of_charge'] = max(state['state_of_charge'] + value, MIN_CHARGE)
 
             exp_mult = partial(self.exp_mult, state=state, lifetime_constant=lifetime_constant)
-            new_state.energy_capacity = exp_mult(state.energy_capacity)
-            new_state.power_capacity =  exp_mult(state.power_capacity)
-            new_state.charging_efficiency = exp_mult(state.charging_efficiency)
-            new_state.discharging_efficiency =  exp_mult(state.discharging_efficiency)
-            new_state.current_time += 1
+            new_state['energy_capacity'] = exp_mult(state['energy_capacity'])
+            new_state['power_capacity'] =  exp_mult(state['power_capacity'])
+            new_state['charging_efficiency'] = exp_mult(state['charging_efficiency'])
+            new_state['discharging_efficiency'] =  exp_mult(state['discharging_efficiency'])
+            new_state['current_time'] = move_time_tick(new_state['current_time'])
             return new_state	
         else:
             raise ValueError('Invalid action')
 
-    def predict(self, action, params, state):
+    def predict(self, action: EnergyAction, state: StorageState=None, params= None):
         pass
     
     @staticmethod

@@ -52,11 +52,11 @@ class ConsumptionDynamics(EnergyDynamics):
         super().__init__(dynamics_params)
 
     @abstractmethod
-    def do(self, action: EnergyAction, state: State, params):
+    def do(self, action: EnergyAction, state: State= None, params= None):
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state: State, params):
+    def predict(self, action: EnergyAction, state: State= None, params= None):
         pass
 
     @abstractmethod
@@ -73,11 +73,11 @@ class StorageDynamics(EnergyDynamics):
         super().__init__(dynamics_params)
 
     @abstractmethod
-    def do(self, action: EnergyAction, state: State):
+    def do(self, action: EnergyAction, state: State=None, params= None):
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state: State):
+    def predict(self, action: EnergyAction, state: State=None, params= None):
         pass
 
 

@@ -35,7 +35,7 @@ def test_household():
         production_params_arr.append(production_params)
 
         # initilaize household
-        household = Household(name="test_household", consumption_params_dict=consumption_params_arr, storage_params_dict=storage_params_arr, production_params_dict=production_params_arr, agg_func= lambda nums: sum(nums))
+        household = Household(name="test_household", consumption_params_dict=consumption_params_arr, storage_params_dict=storage_params_arr, production_params_dict=production_params_arr, agg_func= None) #lambda nums: sum(nums))
 
         # perform test action
         household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=100), 'test_pv': ProduceAction(produce=10)})

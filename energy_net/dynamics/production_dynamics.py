@@ -7,17 +7,16 @@ class PVDynamics(ProductionDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action: EnergyAction, state: State) -> float:
+    def do(self, action: EnergyAction, state:State=None , params= None) -> float:
 
         """Get solar generation output.
         """
         value = action['produce']
         if value is not None:
-           return value
+           return state
         else:
             raise ValueError('Invalid action')
 
-    
     def predict(self, action, params, state):
         pass
 
