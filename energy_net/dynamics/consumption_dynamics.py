@@ -48,9 +48,6 @@ class HouseholdConsumptionDynamics(ConsumptionDynamics):
     def do(self, action: EnergyAction, state:State=None , params= None) -> float:
         return 8
 
-    def do(self, action: EnergyAction, state: State=None, params= None):
-        return state
-
     def get_current_consumption_capability(self):
         pass
 
