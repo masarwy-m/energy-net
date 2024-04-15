@@ -1,3 +1,4 @@
+from ..config import DEFAULT_PRODUCTION
 from ..dynamics.energy_dynamcis import  ProductionDynamics
 from ..model.energy_action import EnergyAction
 from ..model.state import State
@@ -13,10 +14,11 @@ class PVDynamics(ProductionDynamics):
         """
         value = action['produce']
         if value is not None:
-           return state
+           return value
         else:
-            raise ValueError('Invalid action')
-
+            return self.get_current_production(state,params)
+    def get_current_production(self, state, params):
+        return DEFAULT_PRODUCTION
     def predict(self, action, params, state):
         pass
 

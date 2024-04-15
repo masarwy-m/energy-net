@@ -7,9 +7,9 @@ class StorageAction(EnergyAction, total=False):
     charge: float
 
 class ProduceAction(EnergyAction, total=False):
-    produce: float
+    produce: float = None
 
 class ConsumeAction(EnergyAction, total=False):
-    consume: float
+    consume: float = None
 
 

@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 from .params import DynamicsParams
+from ..config import DEFAULT_PRODUCTION
 from ..model.state import State
 from ..model.energy_action import EnergyAction
 
@@ -44,6 +45,7 @@ class ProductionDynamics(EnergyDynamics):
     @abstractmethod
     def predict_production_capability(self, state: State):
         pass
+
 
 
 class ConsumptionDynamics(EnergyDynamics):
