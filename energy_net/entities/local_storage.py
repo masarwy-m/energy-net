@@ -5,12 +5,10 @@ from gymnasium.spaces import Box
 import numpy as np
 
 from .params import StorageParams
-from ..defs import BatteryState, ChargeAction
+from ..model.state import BatteryState
+from ..model.energy_action import StorageAction
 from .device import StorageDevice
 from ..config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
-
-
-
 
 
 class Battery(StorageDevice):
@@ -18,7 +16,7 @@ class Battery(StorageDevice):
     """
     def __init__(self, storage_params:StorageParams):
         super().__init__(storage_params)
-        self.action_type = ChargeAction
+        self.action_type = StorageAction
         self.current_time = INITIAL_TIME
 
     @property

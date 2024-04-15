@@ -4,7 +4,8 @@ import numpy as np
 
 
 from ..entities.device import Device
-from ..defs import ConsumerState, ConsumeAction
+from ..model.state import ConsumerState
+from ..model.energy_action import ConsumeAction
 from ..config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 from .params import ConsumptionParams
 
@@ -23,9 +24,9 @@ class ConsumerDevice(Device):
     """
     
     def __init__(self, consumptionParams:ConsumptionParams):
-        super().__init__()
-        self.efficiency = MAX_EFFICIENCY if consumptionParams.efficiency is None else consumptionParams.efficiency
-        self.max_electric_power = MAX_ELECTRIC_POWER if consumptionParams.max_electric_power is None else consumptionParams.max_electric_power
+        super().__init__(consumptionParams)
+        self.max_electric_power = MAX_ELECTRIC_POWER if consumptionParams["max_electric_power"] is None else consumptionParams["max_electric_power"]
+        self.efficiency = MAX_EFFICIENCY if consumptionParams["efficiency"] is None else consumptionParams["efficiency"]
         self.init_max_electric_power = self.max_electric_power
         self.consumption = NO_CONSUMPTION
         self.action_type = ConsumeAction

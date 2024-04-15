@@ -1,6 +1,6 @@
 
 from .EnergyNetEnv import EnergyNetEnv
-from ..wrappers.order_enforcing_parallel import  OrderEnforcingParallelWrapper
+from energy_net.env.wrappers.order_enforcing_parallel import  OrderEnforcingParallelWrapper
 
 
 def parallel_env(*args, **kwargs):

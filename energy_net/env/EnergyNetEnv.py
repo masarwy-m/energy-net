@@ -5,8 +5,8 @@ from gymnasium.utils import seeding
 from pettingzoo import ParallelEnv
 
 from ..network_entity import NetworkEntity
-from ..defs import EnergyAction
-from ..reward_function import RewardFunction, HouseholdDummyRewardFunction
+from ..model.energy_action import EnergyAction
+from ..model.reward import RewardFunction
 from ..config import DEFAULT_TIME_STEP
 from ..env.base import Environment, EpisodeTracker
 from ..utils.env_utils import default_network_entities, default_reward
@@ -149,9 +149,29 @@ class EnergyNetEnv(ParallelEnv, Environment):
         return obs, rewards, terminations, truncs, infos  
         # return obs, rewards, self.terminated, truncs, self.get_info() 
     
+    '''
 
-   
+    @abstractmethod
+    def get_action_space(self) -> spaces:
+        """
+        Get the action space of the network entity.
 
+        Returns:
+        spaces: The action space.
+        """
+        pass
+
+    @abstractmethod
+    def get_observation_space(self) -> spaces:
+        """
+        Get the observation space of the network entity.
+
+        Returns:
+        spaces: The observation space.
+        """
+        pass
+
+    '''
     @lru_cache(maxsize=None)
     def observation_space(self, agent: str):
         return self.__observation_space[agent]

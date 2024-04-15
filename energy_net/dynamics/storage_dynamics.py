@@ -1,18 +1,17 @@
 import numpy as np
-from numpy.typing import ArrayLike
 from functools import partial
 
-
 from .energy_dynamcis import StorageDynamics
-from ..defs import BatteryState
-from ..config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT
+from ..model.state import BatteryState
+from ..model.energy_action import StorageAction
+from ..config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT, DEFAULT_LIFETIME_CONSTANT
 
 
 class BatteryDynamics(StorageDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action: ArrayLike, state:BatteryState, **parameters) -> BatteryState:
+    def do(self, action: StorageAction, state:BatteryState, **parameters) -> BatteryState:
         
         """Perform action on battery.
             parameters
@@ -25,9 +24,10 @@ class BatteryDynamics(StorageDynamics):
             return : BatteryState
                 New state of charge in [kWh].
         """
-        assert action.ndim == 1, 'Only one action is allowed'
-        value = action[0]
-        lifetime_constant = parameters.get('lifetime_constant')
+        value = action["charge"]
+        lifetime_constant = DEFAULT_LIFETIME_CONSTANT
+        if 'lifetime_constant' in parameters:
+            lifetime_constant = parameters.get('lifetime_constant')
         if value is not None:
             new_state = state.copy()
             if value > MIN_CHARGE: # Charge
