@@ -4,13 +4,13 @@ import warnings
 
 import numpy as np
 
-from energy_net.defs import EnergyAction, ProduceAction, ChargeAction, ConsumeAction
-from energy_net.dynamics.consumption_dynamic import HouseholdConsumptionDynamics
-from energy_net.dynamics.production_dynmaics import PVDynamics
+from energy_net.model.energy_action import EnergyAction, ProduceAction, StorageAction, ConsumeAction
+from energy_net.dynamics.consumption_dynamics import HouseholdConsumptionDynamics
+from energy_net.dynamics.production_dynamics import PVDynamics
 from energy_net.dynamics.storage_dynamics import BatteryDynamics
 from energy_net.entities.household import Household
 from energy_net.entities.params import StorageParams, ConsumptionParams, ProductionParams
-
+from energy_net.config import DEFAULT_LIFETIME_CONSTANT
 # Add the project's root directory to sys.path
 from energy_net.env.single_entity_v0 import gym_env
 from common import single_agent_cfgs
@@ -21,7 +21,7 @@ def test_household():
 
         # initialize consumer devices
         consumption_params_arr=[]
-        consumption_params = ConsumptionParams(name='household_consumption', energy_dynamics=HouseholdConsumptionDynamics())
+        consumption_params = ConsumptionParams(name='household_consumption', energy_dynamics=HouseholdConsumptionDynamics(), lifetime_constant=DEFAULT_LIFETIME_CONSTANT)
         consumption_params_arr.append(consumption_params)
 
         # initialize storage devices
@@ -38,10 +38,7 @@ def test_household():
         household = Household(name="test_household", consumption_params_dict=consumption_params_arr, storage_params_dict=storage_params_arr, production_params_dict=production_params_arr, agg_func= lambda nums: sum(nums))
 
         # perform test action
-        chargeAction  =  EnergyAction(produce=None, consume=None, charge=ChargeAction(charge=10))
-        consumeAction =  EnergyAction(produce=ProduceAction(produce=10), consume=None, charge=None)
-        produceAction =  EnergyAction(produce=None, consume=ConsumeAction(consume=100), charge=None)
-        household.step({'test_battery':chargeAction, 'household_consumption':consumeAction, 'test_pv': produceAction})
+        household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=100), 'test_pv': ProduceAction(produce=10)})
 
         # initialize pettingzoo environment wrapper
         '''

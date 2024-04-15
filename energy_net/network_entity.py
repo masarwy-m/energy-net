@@ -1,13 +1,14 @@
 from abc import abstractmethod
 from collections import OrderedDict
-from typing import Any, Union
-from gymnasium import spaces
+from typing import Union
 import numpy as np
-from numpy.typing import ArrayLike
 
 from .dynamics.energy_dynamcis import EnergyDynamics
 from .utils.utils import AggFunc
-from .defs import EnergyAction, State, Reward
+from .model.energy_action import EnergyAction
+from .model.state import State
+from .model.reward import Reward
+
 
 class NetworkEntity:
     """
@@ -48,65 +49,6 @@ class NetworkEntity:
 
         Returns:
         list: The predicted new state and reward after performing the action.
-        """
-        pass
-
-    @abstractmethod
-    def get_current_state(self) -> State:
-        """
-        Get the current state of the network entity.
-
-        Returns:
-        State: The current state.
-        """
-        pass
-
-    @abstractmethod
-    def update_state(self, state: State) -> None:
-        """
-        Update the state of the network entity.
-
-        Parameters:
-        state (State): The new state.
-        """
-        pass
-
-    @abstractmethod
-    def get_reward(self) -> Reward:
-        """
-        Get the current reward of the network entity.
-
-        Returns:
-        Reward: The current reward.
-        """
-        pass
-
-    def reset(self) -> State:
-        """
-        Reset the state of the network entity.
-
-        Returns:
-        State: The initial state.
-        """
-        pass
-
-    @abstractmethod
-    def get_action_space(self) -> spaces:
-        """
-        Get the action space of the network entity.
-
-        Returns:
-        spaces: The action space.
-        """
-        pass
-
-    @abstractmethod
-    def get_observation_space(self) -> spaces:
-        """
-        Get the observation space of the network entity.
-
-        Returns:
-        spaces: The observation space.
         """
         pass
 
@@ -167,21 +109,33 @@ class ElementaryNetworkEntity(NetworkEntity):
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
 
-    def __init__(self, name, energy_dynamics: EnergyDynamics):
+    def __init__(self, name, energy_dynamics: EnergyDynamics , init_state:State=None):
         super().__init__(name)
+        # if the state is none - this is a stateless entity
+        self.state = init_state
         self.energy_dynamics = energy_dynamics
 
-    def step(self, action: ArrayLike):
-        state = self.get_current_state()
-        new_state = self.energy_dynamics.do(action, state, **self.dynamic_parametrs())
-        self.update_state(new_state)
-        return {self.name: new_state}
+    def step(self, action: EnergyAction):
+        if self.state:
+            new_state = self.energy_dynamics.do(action, self.state)
+            self.update_state(new_state)
+        else:
+            return self.energy_dynamics.do(action)
 
     def predict(self, action: EnergyAction, state: State):
-        state = self.get_current_state()
         predicted_state = self.energy_dynamics.predict(action, state)
-        return {self.name: predicted_state}
+        return predicted_state
 
-    @abstractmethod
-    def dynamic_parametrs(self):
-        pass
+
+    def get_current_state(self) -> State:
+        """
+        Get the current state of the network entity.
+
+        Returns:
+        State: The current state.
+        """
+        return self.state
+
+    def update_state(self, state: State) -> None:
+        self.state = state
+

@@ -7,12 +7,12 @@ from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
 from ..network_entity import NetworkEntity
 from ..entities.local_storage import Battery
 from ..dynamics.storage_dynamics import BatteryDynamics
-from ..entities.private_producer import PrivateProducer
-from ..dynamics.production_dynmaics import PVDynamics
-from ..entities.local_consumer import ConsumerDevice
-from ..dynamics.consumption_dynamic import ElectricHeaterDynamics
+from ..entities.local_producer import PrivateProducer
+from ..dynamics.production_dynamics import PVDynamics
+from ..entities.consumer_device import ConsumerDevice
+from ..dynamics.consumption_dynamics import ElectricHeaterDynamics
 from ..entities.household import Household
-from ..reward_function import RewardFunction
+from ..model.reward import RewardFunction
 
 
 def observation_seperator(observation:dict[str, np.ndarray]):

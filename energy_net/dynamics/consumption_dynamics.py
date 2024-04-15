@@ -1,30 +1,15 @@
 from numpy.typing import ArrayLike
 
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
-from ..defs import ConsumerState
+from ..model.energy_action import EnergyAction
+from ..model.state import ConsumerState, State
 
 
-class HouseholdConsumptionDynamics(ConsumptionDynamics):
-    def __init__(self) -> None:
-        super().__init__()
-
-    def do(self, action: ArrayLike, state: ConsumerState, **parameters) -> float:
-        pass
-
-    def predict(self, action, params, state):
-        pass
-
-    def get_current_consumption_capability(self):
-        pass
-
-    def predict_consumption_capability(self, state):
-        pass
 class ElectricHeaterDynamics(ConsumptionDynamics):
     def __init__(self) -> None:
         super().__init__()
         
-
-    def do(self, action:ArrayLike, state:ConsumerState, **parameters) -> float:
+    def do(self, action: EnergyAction, state:State) -> float:
         """Get electric heater consumption.
         
         Parameters
@@ -36,7 +21,6 @@ class ElectricHeaterDynamics(ConsumptionDynamics):
         return : float
             Electric heater consumption in [kW].
         """
-        assert action.ndim == 1, 'Only one action is allowed'
         value = action[0]
         if value is not None:
             new_state = state.copy()
@@ -48,6 +32,24 @@ class ElectricHeaterDynamics(ConsumptionDynamics):
     
     def predict(self, action, params, state):
         pass
+
+    def get_current_consumption_capability(self):
+        pass
+
+    def predict_consumption_capability(self, state):
+        pass
+
+
+
+class HouseholdConsumptionDynamics(ConsumptionDynamics):
+    def __init__(self) -> None:
+        super().__init__()
+
+    def do(self, action: ArrayLike, state: ConsumerState, **parameters) -> float:
+        return 8
+
+    def predict(self, action, params, state):
+        return state
 
     def get_current_consumption_capability(self):
         pass

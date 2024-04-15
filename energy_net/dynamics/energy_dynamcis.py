@@ -1,23 +1,42 @@
 from abc import abstractmethod
-import sys, os
-from numpy.typing import ArrayLike
-import numpy as np 
 
-
-from ..defs import State
+from .params import DynamicsParams
+from ..model.state import State
+from ..model.energy_action import EnergyAction
 
 
 class EnergyDynamics():
+
+    def __init__(self, dynamics_params:DynamicsParams = None):
+        """
+        Constructor for the NetworkEntity class.
+
+        Parameters:
+        name (str): The name of the network entity.
+        """
+        self.dynamics_params = dynamics_params
     @abstractmethod
-    def do(self, action: ArrayLike, state: np.ndarray, **parameters):
+    def do(self, action: EnergyAction, state:State = None):
         pass
 
     @abstractmethod
-    def predict(self, action: ArrayLike, state: np.ndarray, **parameters):
+    def predict(self, action: EnergyAction, state:State = None, params = None):
         pass
 
 
 class ProductionDynamics(EnergyDynamics):
+
+   def __init__(self, dynamics_params:DynamicsParams = None):
+    super().__init__(dynamics_params)
+
+    @abstractmethod
+    def do(self, action: EnergyAction, state: State = None, params = None):
+        pass
+
+    @abstractmethod
+    def predict(self, action: EnergyAction, state: State = None, params = None):
+        pass
+
     @abstractmethod
     def get_current_production_capability(self):
         pass
@@ -28,6 +47,18 @@ class ProductionDynamics(EnergyDynamics):
 
 
 class ConsumptionDynamics(EnergyDynamics):
+
+    def __init__(self, dynamics_params: DynamicsParams = None):
+        super().__init__(dynamics_params)
+
+    @abstractmethod
+    def do(self, action: EnergyAction, state: State, params):
+        pass
+
+    @abstractmethod
+    def predict(self, action: EnergyAction, state: State, params):
+        pass
+
     @abstractmethod
     def get_current_consumption_capability(self):
         pass
@@ -37,7 +68,19 @@ class ConsumptionDynamics(EnergyDynamics):
         pass
 
 class StorageDynamics(EnergyDynamics):
-    
+
+    def __init__(self, dynamics_params: DynamicsParams = None):
+        super().__init__(dynamics_params)
+
+    @abstractmethod
+    def do(self, action: EnergyAction, state: State):
+        pass
+
+    @abstractmethod
+    def predict(self, action: EnergyAction, state: State):
+        pass
+
+
     @abstractmethod
     def get_current_discharge_capability(self):
         pass
@@ -59,10 +102,14 @@ class TransmissionDynamics(EnergyDynamics):
 
 
 class ComplexDynamics(EnergyDynamics):
+
+    def __init__(self, dynamics_params: DynamicsParams = None):
+        super().__init__(dynamics_params)
+
     @abstractmethod
-    def do(self, action: ArrayLike, state: np.ndarray, sub_entities_dynamics:list[EnergyDynamics]):
+    def do(self, action: EnergyAction, state: State, sub_entities_dynamics:list[EnergyDynamics]):
         pass
 
     @abstractmethod
-    def predict(self, action: ArrayLike, state: np.ndarray, sub_entities_dynamics:list[EnergyDynamics]):
+    def predict(self, action: EnergyAction, state: State, sub_entities_dynamics:list[EnergyDynamics]):
         pass

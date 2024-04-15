@@ -1,12 +1,9 @@
-
-import sys
-import os
 import warnings
 from typing import Mapping, List, Union, Any
 
 # Add the project's root directory to sys.path
 from energy_net.env.single_entity_v0 import gym_env
-from energy_net.reward_function import RewardFunction
+from energy_net.model.reward import RewardFunction
 from tests.common import single_agent_cfgs
 
 

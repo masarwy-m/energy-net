@@ -1,7 +1,8 @@
 from scipy.integrate import quad
 from scipy.misc import derivative
 from typing import Callable, Any, TypedDict
-from ..defs import State
+
+from ..model.state import State
 
 AggFunc = Callable[[list[dict[str, Any]]], dict[str, Any]]
 

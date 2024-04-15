@@ -14,6 +14,26 @@ class DeviceParams(TypedDict):
     energy_dynamics: EnergyDynamics = None
 
 
+class StorageParams(DeviceParams):
+    energy_capacity: float
+    power_capacity: float
+    inital_charge: float
+    charging_efficiency: float
+    discharging_efficiency: float
+
+
+class ConsumptionParams(DeviceParams):
+    energy_capacity: float
+    power_capacity: float
+    inital_charge: float
+
+
+class ProductionParams(DeviceParams):
+    max_producion: float
+
+
+
+
 '''
     energy_capacity : float, default: inf
         Maximum amount of energy the storage device can store in [kWh]. Must be >= 0.
@@ -32,20 +52,3 @@ class DeviceParams(TypedDict):
     name : str, default: None
         Name of the storage device. Must be a string.
 '''
-
-class StorageParams(DeviceParams):
-    energy_capacity: float
-    power_capacity: float
-    inital_charge: float
-    charging_efficiency: float
-    discharging_efficiency: float
-
-
-class ConsumptionParams(DeviceParams):
-    energy_capacity: float
-    power_capacity: float
-    inital_charge: float
-
-
-class ProductionParams(DeviceParams):
-    max_producion: float

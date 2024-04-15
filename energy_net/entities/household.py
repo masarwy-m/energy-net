@@ -3,25 +3,19 @@ from gymnasium.spaces import Dict
 import numpy as np
 from numpy.typing import ArrayLike
 
-from ..defs import EnergyAction, State
+from ..model.energy_action import EnergyAction
+from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
 from ..entities.device import StorageDevice
 from ..utils.utils import AggFunc, get_value_by_type
-from ..dynamics.consumption_dynamic import ElectricHeaterDynamics
-from ..dynamics.production_dynmaics import PVDynamics
+from ..dynamics.consumption_dynamics import ElectricHeaterDynamics
+from ..dynamics.production_dynamics import PVDynamics
 from ..dynamics.storage_dynamics import BatteryDynamics
-from ..entities.local_consumer import ConsumerDevice
+from ..entities.consumer_device import ConsumerDevice
 from ..entities.local_storage import Battery
 from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
-from ..entities.private_producer import PrivateProducer
-
-
-class HouseholdConsumption(ElementaryNetworkEntity):
-    def __init__(self, consumption_dynamics:ConsumptionDynamics):
-        super().__init__(consumption_dynamics['name'], consumption_dynamics)
-
-
+from ..entities.local_producer import PrivateProducer
 
 
 class Household(CompositeNetworkEntity):
@@ -35,8 +29,8 @@ class Household(CompositeNetworkEntity):
             # initialize consumer devices (non-shiftable loads)
             self.consumption_array = []
             for consumption_params in consumption_params_dict:
-                device = HouseholdConsumption(consumption_params)
-                self.consumption_array.append(device)
+                householdConsumption = HouseholdConsumption(consumption_params)
+                self.consumption_array.append(householdConsumption)
 
             # initialize storage devices
             self.storage_array = []
@@ -58,7 +52,7 @@ class Household(CompositeNetworkEntity):
         super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
-        print('step in household')
+        pass
 
     def get_current_state(self):
         return self.apply_func_to_sub_entities(lambda entity: entity.get_current_state())
@@ -88,6 +82,12 @@ class Household(CompositeNetworkEntity):
             if condition(entity):
                 results[name] = func(entity)
         return results
+
+
+class HouseholdConsumption(ElementaryNetworkEntity):
+    def __init__(self, consumption_params:ConsumptionParams):
+        super().__init__(name=consumption_params["name"],energy_dynamics=consumption_params["energy_dynamics"])
+
 
 
 class HouseholdIS(CompositeNetworkEntity):
@@ -129,12 +129,6 @@ class HouseholdIS(CompositeNetworkEntity):
             if condition(entity):
                 results[name] = func(entity)
         return results
-
-
-
-
-
-
 
 
 

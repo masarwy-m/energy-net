@@ -1,5 +1,6 @@
 from .market_entity import MarketEntity
-from .defs import State, Bid
+from .model.state import State
+from .defs import Bid
 from .utils.utils import condition, get_predicted_state
 
 

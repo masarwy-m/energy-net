@@ -4,7 +4,8 @@ import numpy as np
 
 
 from ..entities.device import Device
-from ..defs import ConsumerState, ConsumeAction
+from ..model.state import ConsumerState
+from ..model.energy_action import ConsumeAction
 from ..config import MAX_ELECTRIC_POWER, MIN_POWER, MIN_EFFICIENCY, MAX_EFFICIENCY, NO_CONSUMPTION
 from .params import ConsumptionParams
 

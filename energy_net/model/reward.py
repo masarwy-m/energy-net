@@ -1,7 +1,7 @@
-from typing import Any, List, Mapping, Tuple, Union
+from typing import Any, List, Mapping, Union
 from abc import ABC, abstractmethod
 
-
+Reward = List[float]
 class RewardFunction(ABC):
     r"""Base and default reward function class.
 
