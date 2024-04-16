@@ -19,45 +19,73 @@ from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
 from ..entities.local_producer import PrivateProducer
 
 
+class HouseholdState(State):
+    storage:float
+    producer:float
+    consumer:float
+
+
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
     The household entity is responsible for managing the sub-entities and aggregating the reward.
     """
+    def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
+        self.consumption_dict = {name: HouseholdConsumption(params) for name, params in consumption_params_dict.items()}
+        self.storage_dict = {name: Battery(init_time=INITIAL_TIME, storage_params=params) for name, params in storage_params_dict.items()}
+        self.production_dict = {name: PrivateProducer(params) for name, params in production_params_dict.items()}
+        sub_entities = {**self.consumption_dict, **self.storage_dict, **self.production_dict}.values()
+        super().__init__(name=name, sub_entities=sub_entities, agg_func=agg_func)
+        
+        
+        # self.state = self.reset() # Itay
+        
 
-    def __init__(self, name: str, sub_entities: list[NetworkEntity] = None, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
+    # def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
+    #     if sub_entities is None:
+    #         # initialize consumer devices (non-shiftable loads)
+    #         self.consumption_array = []
+    #         for consumption_params in consumption_params_dict:
+    #             householdConsumption = HouseholdConsumption(consumption_params)
+    #             self.consumption_array.append(householdConsumption)
 
-        if sub_entities is None:
-            # initialize consumer devices (non-shiftable loads)
-            self.consumption_array = []
-            for consumption_params in consumption_params_dict:
-                householdConsumption = HouseholdConsumption(consumption_params)
-                self.consumption_array.append(householdConsumption)
+    #         # initialize storage devices
+    #         self.storage_array = []
+    #         for storage_params in storage_params_dict:
+    #             device = Battery(init_time=INITIAL_TIME, storage_params=storage_params)
+    #             self.storage_array.append(device)
 
-            # initialize storage devices
-            self.storage_array = []
-            for storage_params in storage_params_dict:
-                device = Battery(init_time=INITIAL_TIME, storage_params=storage_params)
-                self.storage_array.append(device)
+    #         # initialize production devices
+    #         self.production_array = []
+    #         for production_params in production_params_dict:
+    #             device = PrivateProducer(production_params)
+    #             self.production_array.append(device)
 
-            # initialize production devices
-            self.production_array = []
-            for production_params in production_params_dict:
-                device = PrivateProducer(production_params)
-                self.production_array.append(device)
+    #         sub_entities = self.consumption_array+ self.storage_array+ self.production_array
 
-            sub_entities = self.consumption_array+ self.storage_array+ self.production_array
-
-        super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
+    #     super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 
     def step(self, actions: dict[str, EnergyAction]):
-
         super().step(actions)
+
+    def system_time_tick(self, actions: dict[str, EnergyAction]):
+        # current_comsumption = self.get_consupmtion()
+        
+
+        for entity_name, action in actions.items():
+            if self.validate_action(actions):
+                self.storage_dict[entity_name].step(action)
+
+        # current_charge = self.get_charge()
+        # current_production = current_comsumption + current_charge
+        # self.state = HouseholdState(storage=current_charge, producer=current_production, consumer=current_comsumption)
+        
+        # super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
         pass
 
     def get_current_state(self):
-        return self.apply_func_to_sub_entities(lambda entity: entity.get_current_state())
+        return self.state
 
     def update_state(self, state: State):
         for entity in self.sub_entities:
@@ -74,6 +102,13 @@ class Household(CompositeNetworkEntity):
     def reset(self):
         return self.apply_func_to_sub_entities(lambda entity: entity.reset())
 
+    
+    def validate_action(self, actions: dict[str, EnergyAction]):
+        for entity_name, action in actions.items():
+            if len(action) > 1 or 'charge' not in action.keys():
+                raise ValueError(f"Invalid action key {action.keys()} for entity {entity_name}")
+            else:
+                return True
     @property
     def current_storge_state(self):
         return sum([s.current_state['state_of_charge'] for s in self.storage_units])
