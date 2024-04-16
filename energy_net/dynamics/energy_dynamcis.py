@@ -1,6 +1,7 @@
 from abc import abstractmethod
 
 from .params import DynamicsParams
+from ..config import DEFAULT_PRODUCTION
 from ..model.state import State
 from ..model.energy_action import EnergyAction
 
@@ -46,17 +47,18 @@ class ProductionDynamics(EnergyDynamics):
         pass
 
 
+
 class ConsumptionDynamics(EnergyDynamics):
 
     def __init__(self, dynamics_params: DynamicsParams = None):
         super().__init__(dynamics_params)
 
     @abstractmethod
-    def do(self, action: EnergyAction, state: State, params):
+    def do(self, action: EnergyAction, state: State= None, params= None):
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state: State, params):
+    def predict(self, action: EnergyAction, state: State= None, params= None):
         pass
 
     @abstractmethod
@@ -73,11 +75,11 @@ class StorageDynamics(EnergyDynamics):
         super().__init__(dynamics_params)
 
     @abstractmethod
-    def do(self, action: EnergyAction, state: State):
+    def do(self, action: EnergyAction, state: State=None, params= None):
         pass
 
     @abstractmethod
-    def predict(self, action: EnergyAction, state: State):
+    def predict(self, action: EnergyAction, state: State=None, params= None):
         pass
 
 

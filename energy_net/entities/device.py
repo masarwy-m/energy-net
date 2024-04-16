@@ -6,8 +6,7 @@ from .params import DeviceParams, StorageParams
 from ..network_entity import ElementaryNetworkEntity
 from ..config import DEFAULT_EFFICIENCY, NO_CHARGE, MAX_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_CAPACITY, INF, \
     DEFAULT_LIFETIME_CONSTANT
-from ..model.state import State
-
+from ..model.state import State, StorageState
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -39,18 +38,18 @@ class Device(ElementaryNetworkEntity):
 class StorageDevice(Device):
     """Base storage device class.
     """
-    def __init__(self, storage_params:StorageParams, init_state:State=None):
+    def __init__(self, init_time, storage_params:StorageParams, init_state:State=None):
+        state_of_charge = storage_params["inital_charge"] if storage_params["inital_charge"] is not None else NO_CHARGE
+        charging_efficiency = storage_params["charging_efficiency"] if storage_params["charging_efficiency"] is not None else DEFAULT_EFFICIENCY
+        discharging_efficiency =storage_params["discharging_efficiency"] if storage_params["discharging_efficiency"] is not None else DEFAULT_EFFICIENCY
+        power_capacity = storage_params["energy_capacity"] if storage_params[
+                                                                       "energy_capacity"] is not None else MAX_CAPACITY
+        energy_capacity = storage_params["power_capacity"] if storage_params[
+                                                                       "power_capacity"] is not None else MAX_CAPACITY
+        if not init_state:
+            init_state = StorageState(state_of_charge=state_of_charge, charging_efficiency= charging_efficiency, discharging_efficiency=discharging_efficiency, power_capacity=power_capacity, energy_capacity=energy_capacity, current_time=init_time)
         super().__init__(storage_params, init_state = init_state)
-        self.power_capacity = storage_params["energy_capacity"] if storage_params["energy_capacity"] is not None else MAX_CAPACITY
 
-        self.energy_capacity =  storage_params["power_capacity"] if storage_params["power_capacity"] is not None else MAX_CAPACITY
-        self.charging_efficiency = storage_params["charging_efficiency"]
-        self.discharging_efficiency =storage_params["discharging_efficiency"]
-        self.state_of_charge = storage_params["inital_charge"] if storage_params["inital_charge"] is not None else NO_CHARGE
-        self.init_power_capacity = self.power_capacity
-        self.init_energy_capacity = self.energy_capacity
-        self.init_state_of_charge = self.state_of_charge
-        
 
 
     @property

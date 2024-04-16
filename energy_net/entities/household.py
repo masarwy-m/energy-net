@@ -3,6 +3,7 @@ from gymnasium.spaces import Dict
 import numpy as np
 from numpy.typing import ArrayLike
 
+from ..config import INITIAL_TIME
 from ..model.energy_action import EnergyAction
 from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
@@ -35,7 +36,7 @@ class Household(CompositeNetworkEntity):
             # initialize storage devices
             self.storage_array = []
             for storage_params in storage_params_dict:
-                device = Battery(storage_params)
+                device = Battery(init_time=INITIAL_TIME, storage_params=storage_params)
                 self.storage_array.append(device)
 
             # initialize production devices
@@ -48,7 +49,7 @@ class Household(CompositeNetworkEntity):
 
         super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 
-    def step(self, actions: Union[np.ndarray, dict[str, Any]]):
+    def step(self, actions: dict[str, EnergyAction]):
         super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):

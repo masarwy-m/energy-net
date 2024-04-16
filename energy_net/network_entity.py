@@ -75,7 +75,9 @@ class CompositeNetworkEntity(NetworkEntity):
 
         else:
             for entity_name, action in actions.items():
-                states[entity_name] = self.sub_entities[entity_name].step(action)
+                cur_state = self.sub_entities[entity_name].step(action)
+                if cur_state:
+                    states[entity_name] = cur_state
 
         if self.agg_func:
             agg_value = self.agg_func(states)
@@ -117,13 +119,14 @@ class ElementaryNetworkEntity(NetworkEntity):
 
     def step(self, action: EnergyAction):
         if self.state:
-            new_state = self.energy_dynamics.do(action, self.state)
+            new_state = self.energy_dynamics.do(action=action, state=self.state)
             self.update_state(new_state)
+            return new_state
         else:
-            return self.energy_dynamics.do(action)
+            return self.energy_dynamics.do(action=action)
 
     def predict(self, action: EnergyAction, state: State):
-        predicted_state = self.energy_dynamics.predict(action, state)
+        predicted_state = self.energy_dynamics.predict(action=action, state=state)
         return predicted_state
 
 

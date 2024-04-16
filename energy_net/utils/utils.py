@@ -59,3 +59,6 @@ def unit_conversion(dest_units: str, x: float, T: tuple[float, float]) -> float:
         # Integrate the power function over the time interval
         y, _ = quad(x, T[0], T[1])
     return y
+
+def move_time_tick(cur_time):
+    return cur_time+1

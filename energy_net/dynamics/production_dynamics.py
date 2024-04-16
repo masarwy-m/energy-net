@@ -1,3 +1,4 @@
+from ..config import DEFAULT_PRODUCTION
 from ..dynamics.energy_dynamcis import  ProductionDynamics
 from ..model.energy_action import EnergyAction
 from ..model.state import State
@@ -7,7 +8,7 @@ class PVDynamics(ProductionDynamics):
     def __init__(self) -> None:
         super().__init__()
 
-    def do(self, action: EnergyAction, state: State) -> float:
+    def do(self, action: EnergyAction, state:State=None , params= None) -> float:
 
         """Get solar generation output.
         """
@@ -15,9 +16,9 @@ class PVDynamics(ProductionDynamics):
         if value is not None:
            return value
         else:
-            raise ValueError('Invalid action')
-
-    
+            return self.get_current_production(state,params)
+    def get_current_production(self, state, params):
+        return DEFAULT_PRODUCTION
     def predict(self, action, params, state):
         pass
 

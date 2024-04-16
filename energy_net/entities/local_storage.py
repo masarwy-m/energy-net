@@ -5,42 +5,41 @@ from gymnasium.spaces import Box
 import numpy as np
 
 from .params import StorageParams
-from ..model.state import BatteryState
 from ..model.energy_action import StorageAction
 from .device import StorageDevice
 from ..config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
+from ..model.state import StorageState
 
 
 class Battery(StorageDevice):
     """Base electricity storage class.
     """
-    def __init__(self, storage_params:StorageParams):
-        super().__init__(storage_params)
+    def __init__(self, init_time, storage_params:StorageParams, init_state:StorageState=None):
+        super().__init__(init_time, storage_params, init_state = init_state)
         self.action_type = StorageAction
-        self.current_time = INITIAL_TIME
 
     @property
-    def current_state(self) -> BatteryState:
-        return BatteryState(energy_capacity = self.energy_capacity, power_capacity = self.power_capacity,
+    def current_state(self) -> StorageState:
+        return StorageState(energy_capacity = self.energy_capacity, power_capacity = self.power_capacity,
                     state_of_charge = self.state_of_charge, charging_efficiency = self.charging_efficiency,
                     discharging_efficiency = self.discharging_efficiency, current_time = self.current_time)
     
-    def get_current_state(self) -> BatteryState:
+    def get_current_state(self) -> StorageState:
         return self.current_state
     
-    def update_state(self, state: BatteryState) -> None:
-        self.energy_capacity = state.energy_capacity
-        self.power_capacity = state.power_capacity
-        self.state_of_charge = state.state_of_charge
-        self.charging_efficiency = state.charging_efficiency
-        self.discharging_efficiency = state.discharging_efficiency
-        self.current_time = state.current_time
+    def update_state(self, state: StorageState) -> None:
+        self.energy_capacity = state['energy_capacity']
+        self.power_capacity = state['power_capacity']
+        self.state_of_charge = state['state_of_charge']
+        self.charging_efficiency = state['charging_efficiency']
+        self.discharging_efficiency = state['discharging_efficiency']
+        self.current_time = state['current_time']
 
 
     def get_reward(self):
         return 0    
     
-    def reset(self) -> BatteryState:
+    def reset(self) -> StorageState:
         super().reset()
         return self.get_current_state()
     
