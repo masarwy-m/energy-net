@@ -3,8 +3,8 @@ from gymnasium.spaces import Dict
 import numpy as np
 from numpy.typing import ArrayLike
 
-from ..config import INITIAL_TIME
-from ..model.action import EnergyAction
+from ..config import INITIAL_TIME, NO_CONSUMPTION
+from ..model.action import EnergyAction, StorageAction
 from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
@@ -24,55 +24,62 @@ class HouseholdState(State):
     production:float
     consumption:float
 
+    
+
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
     The household entity is responsible for managing the sub-entities and aggregating the reward.
     """
     def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
-        self.consumption_dict = {name: HouseholdConsumption(params) for name, params in consumption_params_dict.items()}
-        self.storage_dict = {name: Battery(init_time=INITIAL_TIME, storage_params=params) for name, params in storage_params_dict.items()}
-        self.production_dict = {name: PrivateProducer(params) for name, params in production_params_dict.items()}
-        sub_entities = {**self.consumption_dict, **self.storage_dict, **self.production_dict}.values()
+        consumption_dict = {name: HouseholdConsumption(params) for name, params in consumption_params_dict.items()}
+        storage_dict = {name: Battery(init_time=INITIAL_TIME, storage_params=params) for name, params in storage_params_dict.items()}
+        production_dict = {name: PrivateProducer(params) for name, params in production_params_dict.items()}
+        
+        self.consumption_name_array = list(consumption_dict.keys())
+        self.storage_name_array = list(storage_dict.keys())
+        self.production_name_array = list(production_dict.keys())
+        sub_entities = {**consumption_dict, **storage_dict, **production_dict}
+    
         super().__init__(name=name, sub_entities=sub_entities, agg_func=agg_func)
 
-        #self.state = self.reset()
+        self.state = self.reset()
         
 
 
     def step(self, actions: dict[str, EnergyAction]):
         super().step(actions)
 
-    def system_step(self, actions: dict[str, EnergyAction]):
+    def system_step(self):
         # get current consumption
+        curr_comsumption = self.get_current_consumption()
 
 
         # get current production
+        curr_production = self.get_current_production()
 
 
         # get storage/trade policy
+        curr_storage = []
+        for storage_name in self.storage_name_array:
+            action = StorageAction(charge=self.get_action_space()[storage_name].sample())
+            # execute policy
+            curr_storage.append(self.sub_entities[storage_name].step(action)['state_of_charge'])
 
+        # update storage
+        self.state['storage'] = sum(curr_storage)
 
-        # execute policy
-
-
-
-
-        # current_comsumption = self.get_consupmtion()
-        
-
-        for entity_name, action in actions.items():
-            if self.validate_action(actions):
-                self.storage_dict[entity_name].step(action)
-
-        # current_charge = self.get_charge()
-        # current_production = current_comsumption + current_charge
-        # self.state = HouseholdState(storage=current_charge, producer=current_production, consumer=current_comsumption)
-        
-        # super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
         pass
+
+
+    def get_current_consumption(self):
+        return self.state['consumption']
+    
+    def get_current_production(self):
+        return self.state['production']
+
 
     def get_current_state(self):
         return self.state
@@ -89,8 +96,9 @@ class Household(CompositeNetworkEntity):
         # print(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions), "Action Space")
         return Dict(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions))
 
-    def reset(self):
-        return self.apply_func_to_sub_entities(lambda entity: entity.reset())
+    def reset(self) -> HouseholdState:
+        # return self.apply_func_to_sub_entities(lambda entity: entity.reset())
+        return HouseholdState(consumption=100, production=200, storage=0)
 
     
     def validate_action(self, actions: dict[str, EnergyAction]):
@@ -114,6 +122,10 @@ class Household(CompositeNetworkEntity):
 class HouseholdConsumption(ElementaryNetworkEntity):
     def __init__(self, consumption_params:ConsumptionParams):
         super().__init__(name=consumption_params["name"],energy_dynamics=consumption_params["energy_dynamics"])
+
+
+    def reset(self):
+        return NO_CONSUMPTION
 
 
 

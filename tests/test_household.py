@@ -52,7 +52,7 @@ def test_household():
         # perform test action
         household.step({'test_battery':StorageAction(charge=10)})
 
-        household.system_time_tick({'test_battery':StorageAction(charge=10)}) # Itay
+        household.system_step() # Itay
 
         # initialize pettingzoo environment wrapper
         #for env_name, env_cfg in single_agent_cfgs.items():

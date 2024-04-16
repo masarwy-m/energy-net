@@ -59,9 +59,9 @@ class CompositeNetworkEntity(NetworkEntity):
     predicting the outcome of actions, getting the current state, updating the state, and getting the reward.
     """
 
-    def __init__(self, name: str, sub_entities: list[NetworkEntity] = None, agg_func: AggFunc = None):
+    def __init__(self, name: str, sub_entities: dict[str, NetworkEntity] = None, agg_func: AggFunc = None):
         super().__init__(name)
-        self.sub_entities = OrderedDict({entity.name: entity for entity in sub_entities})
+        self.sub_entities = sub_entities
         self.agg_func = agg_func
 
     def step(self, actions: Union[np.ndarray, dict[str, EnergyAction]]):
