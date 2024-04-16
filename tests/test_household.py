@@ -4,7 +4,7 @@ import warnings
 
 import numpy as np
 
-from energy_net.model.energy_action import EnergyAction, ProduceAction, StorageAction, ConsumeAction
+from energy_net.model.action import EnergyAction, ProduceAction, StorageAction, ConsumeAction
 from energy_net.dynamics.consumption_dynamics import HouseholdConsumptionDynamics
 from energy_net.dynamics.production_dynamics import PVDynamics
 from energy_net.dynamics.storage_dynamics import BatteryDynamics
@@ -40,14 +40,17 @@ def test_household():
         # perform test action
         household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=None), 'test_pv': ProduceAction(produce=None)})
 
+        # perform test action
+        household.step({'test_battery':StorageAction(charge=10)})
+
         # initialize pettingzoo environment wrapper
+        #for env_name, env_cfg in single_agent_cfgs.items():
+        #    seed = hash(env_name)
+        #    seed = abs(hash(str(seed)))
+        #    env = gym_env(**env_cfg, initial_seed=seed)
+
+        #    observation, info = env.reset()
         '''
-        for env_name, env_cfg in single_agent_cfgs.items():
-            seed = hash(env_name)
-            seed = abs(hash(str(seed)))
-            env = gym_env(**env_cfg, initial_seed=seed)
-            observation, info = env.reset()
-       
         # run simulation
         for _ in range(1000):
             action = env.action_space.sample()  # agent policy that uses the observation and info

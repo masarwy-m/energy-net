@@ -5,7 +5,7 @@ from gymnasium.spaces import Box
 from .device import Device
 from .params import ProductionParams
 from ..model.state import ProducerState
-from ..model.energy_action import ProduceAction
+from ..model.action import ProduceAction
 from ..config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
 
 class PrivateProducer(Device):

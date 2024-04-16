@@ -3,7 +3,7 @@ from abc import abstractmethod
 from .params import DynamicsParams
 from ..config import DEFAULT_PRODUCTION
 from ..model.state import State
-from ..model.energy_action import EnergyAction
+from ..model.action import EnergyAction
 
 
 class EnergyDynamics():

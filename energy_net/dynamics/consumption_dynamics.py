@@ -1,7 +1,7 @@
 from numpy.typing import ArrayLike
 
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
-from ..model.energy_action import EnergyAction
+from ..model.action import EnergyAction
 from ..model.state import ConsumerState, State
 
 

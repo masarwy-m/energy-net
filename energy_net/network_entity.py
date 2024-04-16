@@ -5,7 +5,7 @@ import numpy as np
 
 from .dynamics.energy_dynamcis import EnergyDynamics
 from .utils.utils import AggFunc
-from .model.energy_action import EnergyAction
+from .model.action import EnergyAction
 from .model.state import State
 from .model.reward import Reward
 

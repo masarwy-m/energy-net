@@ -1,6 +1,6 @@
 from ..config import DEFAULT_PRODUCTION
 from ..dynamics.energy_dynamcis import  ProductionDynamics
-from ..model.energy_action import EnergyAction
+from ..model.action import EnergyAction
 from ..model.state import State
 from numpy.typing import ArrayLike
 

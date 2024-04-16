@@ -32,7 +32,7 @@ def observation_seperator(observation:dict[str, np.ndarray]):
 
 def default_household():
     """Create a default household with a battery, pv, and load."""
-    battery = Battery(StorageParams(energy_capacity = 100, power_capacity = 200,
+    battery = Battery(storage_params=StorageParams(energy_capacity = 100, power_capacity = 200,
                     inital_charge = 50, charging_efficiency = 1,
                     discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery'))
     pv = PrivateProducer(ProductionParams(max_production=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv'))
