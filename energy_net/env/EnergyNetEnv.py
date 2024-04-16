@@ -5,7 +5,7 @@ from gymnasium.utils import seeding
 from pettingzoo import ParallelEnv
 
 from ..network_entity import NetworkEntity
-from ..model.energy_action import EnergyAction
+from ..model.action import EnergyAction
 from ..model.reward import RewardFunction
 from ..config import DEFAULT_TIME_STEP
 from ..env.base import Environment, EpisodeTracker

@@ -3,7 +3,7 @@ from functools import partial
 
 from .energy_dynamcis import StorageDynamics
 from ..model.state import StorageState
-from ..model.energy_action import StorageAction, EnergyAction
+from ..model.action import StorageAction, EnergyAction
 from ..config import MIN_CHARGE, MIN_EXPONENT, MAX_EXPONENT, DEFAULT_LIFETIME_CONSTANT
 from ..utils.utils import move_time_tick
 

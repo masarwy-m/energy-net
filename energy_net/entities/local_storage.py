@@ -5,7 +5,7 @@ from gymnasium.spaces import Box
 import numpy as np
 
 from .params import StorageParams
-from ..model.energy_action import StorageAction
+from ..model.action import StorageAction
 from .device import StorageDevice
 from ..config import MIN_CHARGE, MIN_EFFICIENCY, MAX_EFFICIENCY, MIN_CAPACITY, MAX_CAPACITY, INITIAL_TIME, MAX_TIME
 from ..model.state import StorageState

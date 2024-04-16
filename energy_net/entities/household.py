@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from ..config import INITIAL_TIME
-from ..model.energy_action import EnergyAction
+from ..model.action import EnergyAction
 from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
@@ -50,6 +50,7 @@ class Household(CompositeNetworkEntity):
         super().__init__(name=name,sub_entities=sub_entities, agg_func=agg_func)
 
     def step(self, actions: dict[str, EnergyAction]):
+
         super().step(actions)
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
