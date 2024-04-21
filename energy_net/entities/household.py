@@ -51,6 +51,7 @@ class Household(CompositeNetworkEntity):
         super().step(actions)
 
     def system_step(self):
+
         # get current consumption
         curr_comsumption = self.get_current_consumption()
 
