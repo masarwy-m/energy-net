@@ -23,36 +23,28 @@ def test_household():
         consumption_params_arr=[]
         consumption_params = ConsumptionParams(name='household_consumption', energy_dynamics=HouseholdConsumptionDynamics(), lifetime_constant=DEFAULT_LIFETIME_CONSTANT)
         consumption_params_arr.append(consumption_params)
-
-
-        consumption_params_dict = {'household_consumption': consumption_params} # Itay
+        consumption_params_dict = {'household_consumption': consumption_params}
 
         # initialize storage devices
         storage_params_arr=[]
         storage_params = StorageParams(name = 'test_battery', energy_capacity = 100, power_capacity = 200,inital_charge = 50, charging_efficiency = 1,discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics = BatteryDynamics())
         storage_params_arr.append(storage_params)
-
-        storage_params_dict = {'test_battery': storage_params} # Itay
+        storage_params_dict = {'test_battery': storage_params}
 
         # initialize production devices
         production_params_arr=[]
         production_params = ProductionParams(name='test_pv', max_production=100, efficiency=0.9, energy_dynamics=PVDynamics())
         production_params_arr.append(production_params)
-
-        production_params_dict = {'test_pv': production_params} # Itay
+        production_params_dict = {'test_pv': production_params}
 
         # initilaize household
-        # household = Household(name="test_household", consumption_params_dict=consumption_params_arr, storage_params_dict=storage_params_arr, production_params_dict=production_params_arr, agg_func= None) #lambda nums: sum(nums))
-
-        household = Household(name="test_household", consumption_params_dict=consumption_params_dict, storage_params_dict=storage_params_dict, production_params_dict=production_params_dict, agg_func= None) # Itay
+        household = Household(name="test_household", consumption_params_dict=consumption_params_dict, storage_params_dict=storage_params_dict, production_params_dict=production_params_dict, agg_func= None)
 
         # perform test action
-        # household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=None), 'test_pv': ProduceAction(produce=None)})
+        household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=None), 'test_pv': ProduceAction(produce=None)})
 
-        # perform test action
-        household.step({'test_battery':StorageAction(charge=10)})
-
-        household.system_step() # Itay
+        # perform system step
+        household.system_step()
 
         # initialize pettingzoo environment wrapper
         #for env_name, env_cfg in single_agent_cfgs.items():

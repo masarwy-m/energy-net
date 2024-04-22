@@ -4,7 +4,7 @@ import numpy as np
 from numpy.typing import ArrayLike
 
 from ..config import INITIAL_TIME, NO_CONSUMPTION
-from ..model.action import EnergyAction, StorageAction
+from ..model.action import EnergyAction, StorageAction, TradeAction
 from ..model.state import State
 from ..dynamics.energy_dynamcis import ConsumptionDynamics
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
@@ -53,23 +53,34 @@ class Household(CompositeNetworkEntity):
     def system_step(self):
 
         # get current consumption
-        curr_comsumption = self.get_current_consumption()
+        cur_comsumption = self.get_current_consumption()
 
 
         # get current production
-        curr_production = self.get_current_production()
+        cur_production = self.get_current_production()
 
+
+        # get current price
+        [cur_price_sell, cur_price_buy] = self.get_current_market_price()
 
         # get storage/trade policy
         curr_storage = []
         for storage_name in self.storage_name_array:
-            action = StorageAction(charge=self.get_action_space()[storage_name].sample())
+            charge_value = self.get_action_space()[storage_name].sample()
+            charge_action = StorageAction(charge=charge_value)
             # execute policy
-            curr_storage.append(self.sub_entities[storage_name].step(action)['state_of_charge'])
-
-        # update storage
+            new_state=self.sub_entities[storage_name].step(charge_action)
+            curr_storage.append(new_state['state_of_charge'])
+            # update storage
         self.state['storage'] = sum(curr_storage)
 
+        # buy/sell surplus
+        trade_amount = cur_comsumption
+        trade_power_action = TradeAction(amount=trade_amount)
+
+
+    def get_current_market_price(self):
+        return [8,8]
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
         pass

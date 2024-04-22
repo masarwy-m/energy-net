@@ -12,4 +12,6 @@ class ProduceAction(EnergyAction, total=False):
 class ConsumeAction(EnergyAction, total=False):
     consume: float = None
 
+class TradeAction(EnergyAction, total=False):
+    amount: float
 

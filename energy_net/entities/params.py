@@ -20,7 +20,7 @@ class StorageParams(DeviceParams):
     inital_charge: float
     charging_efficiency: float
     discharging_efficiency: float
-
+    net_connection_size: float
 
 class ConsumptionParams(DeviceParams):
     energy_capacity: float
