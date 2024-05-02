@@ -59,11 +59,15 @@ class NetworkManager:
         return workloads, price
 
 
-    def run(self, initial_state:State, horizons:list[float]=[24,48], stop_criteria:condition = None):
+    def run(self, initial_state:State, stop_criteria:condition, horizons:list[float]=[24,48]):
         cur_state = initial_state
-        if stop_criteria is None or not stop_criteria(cur_state):
+        while not stop_criteria(cur_state):
             for horizon in horizons:
                 predicted_state = get_predicted_state(cur_state,horizon)
                 [demand, bids, workloads, price] = self.do_market_clearing(predicted_state)
+                #check solution validity
 
-        return [demand, bids, workloads, price]
+                #send solution
+
+
+

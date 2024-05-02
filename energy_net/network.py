@@ -1,8 +1,10 @@
-from .network_entity import CompositeNetworkEntity
+from .network_entity import CompositeNetworkEntity, NetworkEntity
 
 
 class Network(CompositeNetworkEntity):
-    pass
+    def __init__(self, network_entities:list[NetworkEntity]):
+        self.network_entities = network_entities
+
 
 
 
