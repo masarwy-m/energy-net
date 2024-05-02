@@ -57,7 +57,7 @@ class BatteryDynamics(StorageDynamics):
             # Clamp the exponent value to prevent overflow
             exponent = state.current_time / float(lifetime_constant)
             exponent =  max(MIN_EXPONENT, min(MAX_EXPONENT, exponent))
-            return x * np.exp(exponent)
+            return x * np.exp(-exponent)
         
 
     
