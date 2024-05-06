@@ -1,3 +1,12 @@
+from typing import Any, Union
+import numpy as np
+
+
+from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, PRED_CONST_DUMMY
+from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction
+from ..model.state import State, HouseholdState, HouseholdConsumptionState
+from ..defs import Bounds
+from ..network_entity import CompositeNetworkEntity, ElementaryNetworkEntity
 from typing import Any, Union, List
 import numpy as np
 from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY
@@ -5,23 +14,6 @@ from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeActi
 from ..defs import Bounds
 from ..model.state import State
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
-from ..entities.device import StorageDevice
-from ..entities.local_storage import Battery
-from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
-from ..entities.local_producer import PrivateProducer
-
-
-class HouseholdState(State):
-    storage:float
-    curr_consumption:float
-    pred_consumption:float
-
-
-class HouseholdConsumptionState(State):
-    consumption:float
-    next_consumption:float
-
-
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
@@ -112,20 +104,19 @@ class Household(CompositeNetworkEntity):
         for entity in self.sub_entities:
             entity.update_state(state[entity.name])
 
-    def get_observation_space(self):
-
+    def get_observation_space(self) -> Bounds:
         low = np.array([NO_CHARGE, NO_CONSUMPTION, NO_CONSUMPTION])
         high = np.array([MAX_CAPACITY, MAX_CONSUMPTION, MAX_CONSUMPTION])
-        return Bounds(low=low,high=high, dtype=np.float32)
-        
+        return Bounds(low=low, high=high, shape=(len(low),) ,dtype=np.float32)
 
-    def get_action_space(self):
+    def get_action_space(self) -> Bounds:
         storage_devices_action_sapces = [v.get_action_space() for v in self.get_storage_devices().values()]
-    
-        # Combine the Box objects into a single Box object
-        combined_low = np.concatenate([box.low for box in storage_devices_action_sapces])
-        combined_high = np.concatenate([box.high for box in storage_devices_action_sapces])
-        return Bounds(low=combined_low, high=combined_high, dtype=np.float32)
+        
+        # Combine the Bounds objects into a single Bound object
+        combined_low = np.array([bound['low'] for bound in storage_devices_action_sapces])
+        combined_high = np.array([bound['high'] for bound in storage_devices_action_sapces])
+        return Bounds(low=combined_low, high=combined_high, shape=(len(combined_low),),  dtype=np.float32)
+
         
 
     def reset(self) -> HouseholdState:
@@ -164,7 +155,7 @@ class HouseholdConsumption(ElementaryNetworkEntity):
         self._state = self.reset()
 
     def predict_next_consumption(self, param: ConsumptionParams = None) -> float:
-        return consumption.predict()
+        return PRED_CONST_DUMMY
 
     def step(self, action: ConsumeAction):
         # Update the state with the current consumption
@@ -183,8 +174,4 @@ class HouseholdConsumption(ElementaryNetworkEntity):
 
     def get_action_space(self):
         return Bounds(low=MIN_POWER, high=self.max_electric_power, dtype=np.float32)
-
-
-
-
 

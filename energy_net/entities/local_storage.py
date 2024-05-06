@@ -1,6 +1,5 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
 
-from typing import Any
 import numpy as np
 
 from .params import StorageParams
@@ -46,15 +45,15 @@ class Battery(StorageDevice):
         self.reset_time()
         return self.get_current_state()
     
-    def get_action_space(self):
+    def get_action_space(self) -> Bounds:
         low = - self.state_of_charge if self.state_of_charge > MIN_CHARGE else MIN_CHARGE
-        return Bounds(low=low, high=(self.energy_capacity - self.state_of_charge), shape=(1,), dtype=np.float32)
+        return Bounds(low=low, high=(self.energy_capacity - self.state_of_charge), shape=(1,), dtype=np.float32)  
 
-    def get_observation_space(self):
+    def get_observation_space(self) -> Bounds:
         low = np.array([MIN_CAPACITY, MIN_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_EFFICIENCY, INITIAL_TIME])
         high = np.array([MAX_CAPACITY, MAX_CAPACITY, self.energy_capacity, MAX_EFFICIENCY, MAX_EFFICIENCY, MAX_TIME])
-        return Bounds(low=low, high=high, dtype=np.float32)
-
+        return Bounds(low=low, high=high,shape=(len(low),),  dtype=np.float32)
+    
     def reset_time(self):
         self.current_time = self.init_time
 

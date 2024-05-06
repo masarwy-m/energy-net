@@ -1,8 +1,10 @@
 
 import numpy as np
+from gymnasium.spaces import Box
 from typing import List, Mapping, Any, Union
 import time
 
+from ..defs import Bounds
 from ..config import DEFAULT_EFFICIENCY, DEFAULT_LIFETIME_CONSTANT
 from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
 from ..network_entity import NetworkEntity
@@ -33,6 +35,14 @@ def observation_seperator(observation:dict[str, np.ndarray]):
     return [observation[name] for name in observation.keys()]
 
 
+def bounds_to_gym_box(bounds: Bounds) -> Box:
+  return Box(
+        low=bounds['low'],
+        high=bounds['high'],
+        shape=bounds['shape'],
+        dtype=bounds['dtype']
+    )
+
 
 def default_household():
     # initialize consumer devices
@@ -61,31 +71,6 @@ def default_network_entities() -> List[NetworkEntity]:
         household = default_household()
         return [household]
 
-
-class DefaultHouseholdRewardFunction(RewardFunction):
-    """Dummy reward function class.
-
-    Parameters
-    ----------
-    env_metadata: Mapping[str, Any]:
-        General static information about the environment.
-    **kwargs : dict
-        Other keyword arguments for custom reward calculation.
-    """
-
-    def __init__(self, env_metadata: Mapping[str, Any], **kwargs):
-        super().__init__(env_metadata, **kwargs)
-
-    def calculate(self, curr_state, action, next_state, **kwargs) -> float:
-        # production = curr_state['curr_consumption'] + action.item()
-        # time_steps = kwargs.get('time_steps', None)
-        # assert time_steps is not None
-        # return  -1 * (production if time_steps  == 0 else 2 * production)
-        return -1 * action.item()
-        
-
-def default_reward(meta_data: dict[str, str])-> RewardFunction:
-    return DefaultHouseholdRewardFunction(env_metadata=meta_data)
 
 
 

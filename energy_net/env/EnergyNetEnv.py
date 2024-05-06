@@ -1,4 +1,4 @@
-from typing import Any, List, Union
+from typing import Any, List, Union, Mapping
 from functools import lru_cache
 from pathlib import Path
 from gymnasium.utils import seeding
@@ -12,7 +12,30 @@ from ..model.action import EnergyAction
 from ..model.reward import RewardFunction
 from ..config import DEFAULT_TIME_STEP
 from ..env.base import Environment, EpisodeTracker
-from ..utils.env_utils import default_reward
+from ..utils.env_utils import bounds_to_gym_box
+
+
+class DefaultHouseholdRewardFunction(RewardFunction):
+    """Dummy reward function class.
+
+    Parameters
+    ----------
+    env_metadata: Mapping[str, Any]:
+        General static information about the environment.
+    **kwargs : dict
+        Other keyword arguments for custom reward calculation.
+    """
+
+    def __init__(self, env_metadata: Mapping[str, Any], **kwargs):
+        super().__init__(env_metadata, **kwargs)
+
+    def calculate(self, curr_state, action, next_state, **kwargs) -> float:
+        # production = curr_state['curr_consumption'] + action.item()
+        # time_steps = kwargs.get('time_steps', None)
+        # assert time_steps is not None
+        # return  -1 * (production if time_steps  == 0 else 2 * production)
+        return -1 * action.item()
+
 
 
 class EnergyNetEnv(ParallelEnv, Environment):
@@ -24,7 +47,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
     metadata = {"name": "energy_net_env_v0"}
 
     def __init__(self,
-        network_entities: List[NetworkEntity] = None,
+        network_entities: List[NetworkEntity],
         root_directory: Union[str, Path] = None, 
         simulation_start_time_step: int = None,
         simulation_end_time_step: int = None,
@@ -40,7 +63,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
         super().__init__(seconds_per_time_step=seconds_per_time_step, random_seed=initial_seed, episode_tracker=self.episode_tracker)
 
 
-        self.network_entities = network_entities #if network_entities is not None else default_network_entities()
+        self.network_entities = network_entities 
         self.timestep = None
         self.episode_time_steps = episode_time_steps
         self.simulation_start_time_step = simulation_start_time_step
@@ -59,8 +82,8 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.agents = []
         
         # set reward function
-        self.reward_function = reward_function if reward_function is not None else default_reward(meta_data=self.get_metadata())
-
+        self.reward_function = reward_function if reward_function is not None else DefaultHouseholdRewardFunction(env_metadata=self.get_metadata)
+       
         # reset environment and initializes episode time steps
         self.reset()
 
@@ -234,10 +257,12 @@ class EnergyNetEnv(ParallelEnv, Environment):
             raise TypeError("observation space not supported")
 
     def get_observation_space(self):
-        return {name: self.convert_space(entity.get_observation_space()) for name, entity in self.entities.items()}
+        return {name: bounds_to_gym_box(entity.get_observation_space()) for name, entity in self.entities.items()}
+    
 
     def get_action_space(self):
-        return {name: self.convert_space(entity.get_action_space()) for name, entity in self.entities.items()}
+        return {name: bounds_to_gym_box(entity.get_action_space()) for name, entity in self.entities.items()}
+
     
 
     @property
