@@ -14,7 +14,7 @@ class Battery(StorageDevice):
     """Base electricity storage class.
     """
     def __init__(self, storage_params:StorageParams, init_state:StorageState=None, init_time=None):
-        super().__init__(storage_params, init_state = init_state, init_time=init_time)
+        super().__init__(storage_params=storage_params, init_state=init_state, init_time=init_time)
         self.action_type = StorageAction
         self.current_time = init_time
 
