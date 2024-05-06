@@ -43,7 +43,7 @@ class StorageDevice(Device):
         self._charging_efficiency = storage_params["charging_efficiency"] if storage_params["charging_efficiency"] is not None else DEFAULT_EFFICIENCY
         self._discharging_efficiency =storage_params["discharging_efficiency"] if storage_params["discharging_efficiency"] is not None else DEFAULT_EFFICIENCY
         self._power_capacity = storage_params["energy_capacity"] if storage_params[
-                                                                       "energy_capacity"] is not None else MAX_CAPACITY
+                                                       "energy_capacity"] is not None else MAX_CAPACITY
         self._energy_capacity = storage_params["power_capacity"] if storage_params[
                                                                        "power_capacity"] is not None else MAX_CAPACITY
         self.init_time = init_time
