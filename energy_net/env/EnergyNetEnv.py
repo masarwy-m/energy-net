@@ -3,15 +3,15 @@ from functools import lru_cache
 from pathlib import Path
 from gymnasium.utils import seeding
 from pettingzoo import ParallelEnv
+from gymnasium.spaces import Box, Dict
 
+from ..defs import Bounds
 from ..network_entity import NetworkEntity
 from ..model.action import EnergyAction
 from ..model.reward import RewardFunction
 from ..config import DEFAULT_TIME_STEP
 from ..env.base import Environment, EpisodeTracker
-from ..utils.env_utils import default_network_entities, default_reward
-
-
+from ..utils.env_utils import default_reward
 
 
 class EnergyNetEnv(ParallelEnv, Environment):
@@ -39,7 +39,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
         super().__init__(seconds_per_time_step=seconds_per_time_step, random_seed=initial_seed, episode_tracker=self.episode_tracker)
 
 
-        self.network_entities = network_entities if network_entities is not None else default_network_entities()
+        self.network_entities = network_entities #if network_entities is not None else default_network_entities()
         self.timestep = None
         self.episode_time_steps = episode_time_steps
         self.simulation_start_time_step = simulation_start_time_step
@@ -58,9 +58,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.agents = []
         
         # set reward function
-        
         self.reward_function = reward_function if reward_function is not None else default_reward(meta_data=self.get_metadata())
-
 
         # reset environment and initializes episode time steps
         self.reset()
@@ -217,14 +215,20 @@ class EnergyNetEnv(ParallelEnv, Environment):
     
     def __observe_all(self):
         return {agent: self.entities[agent].get_current_state() for agent in self.agents}
-    
+
+    def convert_space(self, space):
+        if isinstance(space, dict):
+            return Dict(space)
+        elif isinstance(space, Bounds):
+            return Box(low=space.low, high=space.high, shape=(1,), dtype=space.dtype)
+        else:
+            raise TypeError("observation space not supported")
 
     def get_observation_space(self):
-        return {name: entity.get_observation_space() for name, entity in self.entities.items()}
-    
+        return {name: self.convert_space(entity.get_observation_space()) for name, entity in self.entities.items()}
 
     def get_action_space(self):
-        return {name: entity.get_action_space() for name, entity in self.entities.items()}
+        return {name: self.convert_space(entity.get_action_space()) for name, entity in self.entities.items()}
     
 
     @property

@@ -1,8 +1,6 @@
-from typing import Any
-from gymnasium.spaces import Box
 import numpy as np
 
-
+from ..defs import Bounds
 from ..entities.device import Device
 from ..model.state import ConsumerState
 from ..model.action import ConsumeAction
@@ -72,14 +70,14 @@ class ConsumerDevice(Device):
 
 
     def get_action_space(self):
-        return Box(low=MIN_POWER, high=self.max_electric_power, shape=(1,), dtype=np.float32)
+        return Bounds(low=MIN_POWER, high=self.max_electric_power, dtype=np.float32)
         
 
     def get_observation_space(self):
         # Define the lower and upper bounds for each dimension of the observation space
         low = np.array([NO_CONSUMPTION, MIN_POWER, MIN_EFFICIENCY])  # Example lower bounds
         high = np.array([self.max_electric_power, MAX_ELECTRIC_POWER, MAX_EFFICIENCY])  # Example upper bounds
-        return Box(low=low, high=high, dtype=np.float32)
+        return Bounds(low=low, high=high, dtype=np.float32)
         
     
    

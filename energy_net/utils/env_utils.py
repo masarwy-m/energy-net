@@ -1,6 +1,7 @@
 
 import numpy as np
 from typing import List, Mapping, Any, Union
+import time
 
 from ..config import DEFAULT_EFFICIENCY
 from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
@@ -30,15 +31,15 @@ def observation_seperator(observation:dict[str, np.ndarray]):
     return [observation[name] for name in observation.keys()]
 
 
-def default_household():
+def default_household_dep():
+    init_time = time.localtime()
     """Create a default household with a battery, pv, and load."""
     battery = Battery(storage_params=StorageParams(energy_capacity = 100, power_capacity = 200,
                     inital_charge = 50, charging_efficiency = 1,
-                    discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery'))
-    pv = PrivateProducer(ProductionParams(max_production=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv'))
-    load = ConsumerDevice(ConsumptionParams(max_electric_power=100, efficiency=DEFAULT_EFFICIENCY, energy_dynamics=ElectricHeaterDynamics(), name='test_heater'))
+                    discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics=BatteryDynamics(), name='test_battery', init_time= init_time))
+    pv = PrivateProducer(ProductionParams(max_production=100, efficiency=0.9, energy_dynamics=PVDynamics(), name='test_pv',init_time= init_time))
+    load = ConsumerDevice(ConsumptionParams(max_electric_power=100, efficiency=DEFAULT_EFFICIENCY, energy_dynamics=ElectricHeaterDynamics(), name='test_heater',init_time= init_time))
     return Household(name='test_household', sub_entities=[battery, pv, load])
-
 
 def default_network_entities() -> List[NetworkEntity]:
         household = default_household()

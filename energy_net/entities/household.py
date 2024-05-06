@@ -1,19 +1,13 @@
+import random
 from typing import Any, Union
-from gymnasium.spaces import Dict
 import numpy as np
-from numpy.typing import ArrayLike
 
-from ..config import INITIAL_TIME, NO_CONSUMPTION
+from ..config import INITIAL_TIME, NO_CONSUMPTION, MIN_POWER
+from ..defs import Bounds
 from ..model.action import EnergyAction, StorageAction, TradeAction
 from ..model.state import State
-from ..dynamics.energy_dynamcis import ConsumptionDynamics
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
 from ..entities.device import StorageDevice
-from ..utils.utils import AggFunc, get_value_by_type
-from ..dynamics.consumption_dynamics import ElectricHeaterDynamics
-from ..dynamics.production_dynamics import PVDynamics
-from ..dynamics.storage_dynamics import BatteryDynamics
-from ..entities.consumer_device import ConsumerDevice
 from ..entities.local_storage import Battery
 from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
 from ..entities.local_producer import PrivateProducer
@@ -24,7 +18,6 @@ class HouseholdState(State):
     production:float
     consumption:float
 
-    
 
 
 class Household(CompositeNetworkEntity):
@@ -44,8 +37,6 @@ class Household(CompositeNetworkEntity):
         super().__init__(name=name, sub_entities=sub_entities, agg_func=agg_func)
 
         self.state = self.reset()
-        
-
 
     def step(self, actions: dict[str, EnergyAction]):
         super().step(actions)
@@ -64,15 +55,16 @@ class Household(CompositeNetworkEntity):
         [cur_price_sell, cur_price_buy] = self.get_current_market_price()
 
         # get storage/trade policy
-        curr_storage = []
+        cur_storage = []
         for storage_name in self.storage_name_array:
-            charge_value = self.get_action_space()[storage_name].sample()
+            charge_range = self.get_action_space()[storage_name]
+            charge_value = random.uniform(charge_range['low'],charge_range['high'])
             charge_action = StorageAction(charge=charge_value)
             # execute policy
             new_state=self.sub_entities[storage_name].step(charge_action)
-            curr_storage.append(new_state['state_of_charge'])
+            cur_storage.append(new_state['state_of_charge'])
             # update storage
-        self.state['storage'] = sum(curr_storage)
+        self.state['storage'] = sum(cur_storage)
 
         # buy/sell surplus
         trade_amount = cur_comsumption
@@ -80,6 +72,7 @@ class Household(CompositeNetworkEntity):
 
 
     def get_current_market_price(self):
+        # todo: remove
         return [8,8]
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
@@ -101,12 +94,12 @@ class Household(CompositeNetworkEntity):
             entity.update_state(state[entity.name])
 
     def get_observation_space(self):
-        return Dict(self.apply_func_to_sub_entities(lambda entity: entity.get_observation_space()))
+        return dict(self.apply_func_to_sub_entities(lambda entity: entity.get_observation_space()))
 
     def get_action_space(self):
         conditions = lambda entity: isinstance(entity, StorageDevice)
         # print(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions), "Action Space")
-        return Dict(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions))
+        return dict(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions))
 
     def reset(self) -> HouseholdState:
         # return self.apply_func_to_sub_entities(lambda entity: entity.reset())
@@ -135,10 +128,16 @@ class HouseholdConsumption(ElementaryNetworkEntity):
     def __init__(self, consumption_params:ConsumptionParams):
         super().__init__(name=consumption_params["name"],energy_dynamics=consumption_params["energy_dynamics"])
 
-
     def reset(self):
         return NO_CONSUMPTION
 
+    def get_observation_space(self):
+        low = NO_CONSUMPTION
+        high = np.inf
+        return Bounds(low=low, high=high, dtype=np.float32)
+
+    def get_action_space(self):
+        return Bounds(low=MIN_POWER, high=self.max_electric_power, dtype=np.float32)
 
 
 class HouseholdIS(CompositeNetworkEntity):
@@ -160,12 +159,12 @@ class HouseholdIS(CompositeNetworkEntity):
             entity.update_state(state[entity.name])
 
     def get_observation_space(self):
-        return Dict(self.apply_func_to_sub_entities(lambda entity: entity.get_observation_space()))
+        return dict(self.apply_func_to_sub_entities(lambda entity: entity.get_observation_space()))
 
     def get_action_space(self):
         conditions = lambda entity: isinstance(entity, StorageDevice)
         # print(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions), "Action Space")
-        return Dict(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions))
+        return dict(self.apply_func_to_sub_entities(lambda entity: entity.get_action_space(), conditions))
 
     def reset(self):
         return self.apply_func_to_sub_entities(lambda entity: entity.reset())

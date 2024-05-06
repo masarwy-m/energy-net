@@ -38,7 +38,7 @@ class Device(ElementaryNetworkEntity):
 class StorageDevice(Device):
     """Base storage device class.
     """
-    def __init__(self, init_time, storage_params:StorageParams, init_state:State=None):
+    def __init__(self, storage_params:StorageParams, init_state:State=None, init_time=None):
         state_of_charge = storage_params["inital_charge"] if storage_params["inital_charge"] is not None else NO_CHARGE
         charging_efficiency = storage_params["charging_efficiency"] if storage_params["charging_efficiency"] is not None else DEFAULT_EFFICIENCY
         discharging_efficiency =storage_params["discharging_efficiency"] if storage_params["discharging_efficiency"] is not None else DEFAULT_EFFICIENCY
