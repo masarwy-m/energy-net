@@ -1,17 +1,7 @@
 from typing import Any, Union
 import numpy as np
 import random
-
-<<<<<<< HEAD
-from .local_producer import PrivateProducer
-from .local_storage import Battery
-from .params import ConsumptionParams, StorageParams, ProductionParams
 from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, PRED_CONST_DUMMY
-from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction
-from ..model.state import State, HouseholdState, HouseholdConsumptionState
-=======
-from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, MIN_POWER, PRED_CONST_DUMMY
->>>>>>> 16f748e18a3b234b21232a287eb104820eb937e8
 from ..defs import Bounds
 from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction, ProduceAction
 from ..model.state import State, HouseholdState, HouseholdConsumptionState
