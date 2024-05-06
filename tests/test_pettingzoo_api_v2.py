@@ -5,9 +5,9 @@ import sys
 import os
 
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../energy_net')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from env.energy_net_v0 import parallel_env
+from energy_net.env.energy_net_v0 import parallel_env
 from common import test_env_cfgs
 
 NUM_CYCLES = 1000
