@@ -1,5 +1,5 @@
 '''This code is based on https://github.com/intelligent-environments-lab/CityLearn/blob/master/citylearn/energy_model.py'''
-from typing import Any
+
 import numpy as np
 
 from .params import DeviceParams, StorageParams

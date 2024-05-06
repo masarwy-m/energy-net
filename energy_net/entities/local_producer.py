@@ -1,9 +1,10 @@
-from typing import Any
+
 import numpy as np
-from gymnasium.spaces import Box
+
 
 from .device import Device
 from .params import ProductionParams
+from ..defs import Bounds
 from ..model.state import ProducerState
 from ..model.action import ProduceAction
 from ..config import MIN_POWER, MIN_PRODUCTION, MAX_ELECTRIC_POWER, DEFAULT_SELF_CONSUMPTION
@@ -72,14 +73,14 @@ class PrivateProducer(Device):
         self.max_production = self.init_max_production
         return self.get_current_state()
 
-    def get_action_space(self) -> Box:
-        return Box(low=MIN_POWER, high=self.max_production, shape=(1,), dtype=np.float32)
+    def get_action_space(self) -> Bounds:
+        return Bounds(low=MIN_POWER, high=self.max_production, shape=(1,), dtype=np.float32)
 
-    def get_observation_space(self) -> Box :
+    def get_observation_space(self) -> Bounds :
         # Define the lower and upper bounds for each dimension of the observation space
         low = np.array([MIN_POWER, MIN_POWER])  # Example lower bounds
         high = np.array([self.max_production, MAX_ELECTRIC_POWER])  # Example upper bounds
-        return Box(low=low, high=high, dtype=np.float32)
+        return Bounds(low=low, high=high, shape=(len(low),), dtype=np.float32)
 
 
     
