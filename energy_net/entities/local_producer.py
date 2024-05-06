@@ -62,13 +62,13 @@ class PrivateProducer(Device):
     def update_state(self, state: ProducerState):
         self.max_production = state.max_production
         self.production = state.production
+        super().update_state(state)
         
     
     def get_reward(self):
         return self.self_consumption
     
     def reset(self):
-        super().reset()
         self.max_production = self.init_max_production
         return self.get_current_state()
 

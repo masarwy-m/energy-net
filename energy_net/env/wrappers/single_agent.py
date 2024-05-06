@@ -27,6 +27,8 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
         # run `reset` as usual.
         out = self.env.reset(seed=seed,
                              options=kwargs or None)
+        
+        
        
         
 
@@ -38,9 +40,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
             obs = out
             infos = {k: {} for k in obs.keys()}
 
-         
-        
-
         # return the single entry value as is.
         # no need for the key (only one agent)
         return next(iter(obs.values())), next(iter(infos.values()))
@@ -48,6 +47,7 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
     def step(self, action):
         # step using "joint action" of a single agnet as a dictionary
         step_rets = self.env.step({self.env.agents[0]: action})
+        
         # unpack step return values from their dictionaries
         return tuple(next(iter(ret.values())) for ret in step_rets)
 

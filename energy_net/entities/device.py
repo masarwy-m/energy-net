@@ -38,16 +38,17 @@ class Device(ElementaryNetworkEntity):
 class StorageDevice(Device):
     """Base storage device class.
     """
-    def __init__(self, storage_params:StorageParams, init_state:State=None, init_time=None):
-        state_of_charge = storage_params["inital_charge"] if storage_params["inital_charge"] is not None else NO_CHARGE
-        charging_efficiency = storage_params["charging_efficiency"] if storage_params["charging_efficiency"] is not None else DEFAULT_EFFICIENCY
-        discharging_efficiency =storage_params["discharging_efficiency"] if storage_params["discharging_efficiency"] is not None else DEFAULT_EFFICIENCY
-        power_capacity = storage_params["energy_capacity"] if storage_params[
-                                                                       "energy_capacity"] is not None else MAX_CAPACITY
-        energy_capacity = storage_params["power_capacity"] if storage_params[
+    def __init__(self, init_time, storage_params:StorageParams, init_state:State=None):
+        self._state_of_charge = storage_params["inital_charge"] if storage_params["inital_charge"] is not None else NO_CHARGE
+        self._charging_efficiency = storage_params["charging_efficiency"] if storage_params["charging_efficiency"] is not None else DEFAULT_EFFICIENCY
+        self._discharging_efficiency =storage_params["discharging_efficiency"] if storage_params["discharging_efficiency"] is not None else DEFAULT_EFFICIENCY
+        self._power_capacity = storage_params["energy_capacity"] if storage_params[
+                                                       "energy_capacity"] is not None else MAX_CAPACITY
+        self._energy_capacity = storage_params["power_capacity"] if storage_params[
                                                                        "power_capacity"] is not None else MAX_CAPACITY
+        self.init_time = init_time
         if not init_state:
-            init_state = StorageState(state_of_charge=state_of_charge, charging_efficiency= charging_efficiency, discharging_efficiency=discharging_efficiency, power_capacity=power_capacity, energy_capacity=energy_capacity, current_time=init_time)
+            init_state = StorageState(state_of_charge=self._state_of_charge, charging_efficiency= self._charging_efficiency, discharging_efficiency=self._discharging_efficiency, power_capacity=self._power_capacity, energy_capacity=self._energy_capacity, current_time=init_time)
         super().__init__(storage_params, init_state = init_state)
 
 
@@ -55,48 +56,48 @@ class StorageDevice(Device):
     @property
     def power_capacity(self) -> float:
         r"""Maximum amount of power the storage device can store in [kW]."""
-        return self.__power_capacity
+        return self._power_capacity
     
     @power_capacity.setter
     def power_capacity(self, power_capacity: float):
         power_capacity = MAX_CAPACITY if power_capacity is None else power_capacity
         assert power_capacity >= MIN_CAPACITY, 'power_capacity must be >= 0.'
-        self.__power_capacity = power_capacity
+        self._power_capacity = power_capacity
 
     @property
     def energy_capacity(self) -> float:
         r"""Maximum amount of energy the storage device can store in [kWh]."""
-        return self.__energy_capacity
+        return self._energy_capacity
     
     @energy_capacity.setter
     def energy_capacity(self, energy_capacity: float):
         energy_capacity = MAX_CAPACITY if energy_capacity is None else energy_capacity
         assert energy_capacity >= MIN_CAPACITY, 'energy_capacity must be >= 0.'
-        self.__energy_capacity = energy_capacity
+        self._energy_capacity = energy_capacity
 
 
     @property
     def charging_efficiency(self) -> float:
         r"""Technical efficiency of the charging process."""
-        return self.__charging_efficiency
+        return self._charging_efficiency
     
     @charging_efficiency.setter
     def charging_efficiency(self, charging_efficiency: float):
         charging_efficiency = DEFAULT_EFFICIENCY if charging_efficiency is None else charging_efficiency
         assert charging_efficiency > MIN_EFFICIENCY, 'charging_efficiency must be > 0.'
-        self.__charging_efficiency = charging_efficiency
+        self._charging_efficiency = charging_efficiency
 
 
     @property
     def discharging_efficiency(self) -> float:
         r"""Technical efficiency of the discharging process."""
-        return self.__discharging_efficiency
+        return self._discharging_efficiency
     
     @discharging_efficiency.setter
     def discharging_efficiency(self, discharging_efficiency: float):
         discharging_efficiency = DEFAULT_EFFICIENCY if discharging_efficiency is None else discharging_efficiency
         assert discharging_efficiency > MIN_EFFICIENCY, 'discharging_efficiency must be > 0.'
-        self.__discharging_efficiency = discharging_efficiency
+        self._discharging_efficiency = discharging_efficiency
 
 
     @property
@@ -112,10 +113,10 @@ class StorageDevice(Device):
 
     def reset(self):
         """Reset `StorageDevice` to initial state."""
+        self._power_capacity = self.init_state['power_capacity']
+        self._energy_capacity = self.init_state['energy_capacity']
+        self._state_of_charge = self.init_state['state_of_charge']
         super().reset()
-        self.power_capacity = self.init_power_capacity
-        self.energy_capacity = self.init_energy_capacity
-        self.state_of_charge = self.init_state_of_charge
         
 
     

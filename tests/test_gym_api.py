@@ -10,9 +10,9 @@ import sys
 import os
 
 # Add the project's root directory to sys.path
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../energy_net')))
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from env.single_entity_v0 import gym_env
+from energy_net.env.single_entity_v0 import gym_env
 from common import single_agent_cfgs
 
 NUM_SEEDS = 5

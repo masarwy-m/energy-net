@@ -64,21 +64,16 @@ class CompositeNetworkEntity(NetworkEntity):
         self.sub_entities = sub_entities
         self.agg_func = agg_func
 
-    def step(self, actions: Union[np.ndarray, dict[str, EnergyAction]]):
+    def step(self, actions: dict[str, Union[np.ndarray,EnergyAction]]):
 
         states = {}
-        if type(actions) is np.ndarray:
-            # we convert the entity dict to a list and match action to entities by index
-            sub_entities = list(self.sub_entities.values())
-            for entity_index, action in enumerate(actions):
-                states[sub_entities[entity_index].name] = sub_entities[entity_index].step(np.array([action]))
-
-        else:
-            for entity_name, action in actions.items():
-                cur_state = self.sub_entities[entity_name].step(action)
-                if cur_state:
-                    states[entity_name] = cur_state
-
+        for entity_name, action in actions.items():
+            if type(action) is np.ndarray:
+                action = self.sub_entities[entity_name].action_type.from_numpy(action)
+            cur_state = self.sub_entities[entity_name].step(action)
+            if cur_state:
+                states[entity_name] = cur_state
+    
         if self.agg_func:
             agg_value = self.agg_func(states)
             return agg_value
@@ -115,6 +110,7 @@ class ElementaryNetworkEntity(NetworkEntity):
         super().__init__(name)
         # if the state is none - this is a stateless entity
         self.state = init_state
+        self.init_state = init_state
         self.energy_dynamics = energy_dynamics
 
     def step(self, action: EnergyAction):
@@ -141,4 +137,10 @@ class ElementaryNetworkEntity(NetworkEntity):
 
     def update_state(self, state: State) -> None:
         self.state = state
+        
+
+
+    def reset(self) -> State:
+        self.state = self.init_state
+        return self.state
 

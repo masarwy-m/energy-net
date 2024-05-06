@@ -25,7 +25,7 @@ class BatteryDynamics(StorageDynamics):
             return : BatteryState
                 New state of charge in [kWh].
         """
-        value = action["charge"]
+        value = action["charge"] if isinstance(action, dict) else action
         lifetime_constant = DEFAULT_LIFETIME_CONSTANT
         if params and 'lifetime_constant' in params:
             lifetime_constant = params.get('lifetime_constant')
@@ -57,7 +57,7 @@ class BatteryDynamics(StorageDynamics):
             # Clamp the exponent value to prevent overflow
             exponent = state.current_time / float(lifetime_constant)
             exponent =  max(MIN_EXPONENT, min(MAX_EXPONENT, exponent))
-            return x * np.exp(exponent)
+            return x * np.exp(-exponent)
         
 
     
