@@ -3,6 +3,7 @@ from functools import lru_cache
 from pathlib import Path
 from gymnasium.utils import seeding
 from pettingzoo import ParallelEnv
+import numpy as np
 
 from ..network_entity import NetworkEntity
 from ..model.action import EnergyAction
@@ -99,12 +100,11 @@ class EnergyNetEnv(ParallelEnv, Environment):
 
         # reset reward function (does nothing by default)
         self.reward_function.reset()
-
+        self.__action_space = self.get_action_space()
         # get all observations
         observations = self.__observe_all()
         
         
-
         if not return_info:
             return observations
         else:
@@ -114,21 +114,30 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.__np_random, seed = seeding.np_random(seed)
 
 
-    def step(self, actions: dict[str, EnergyAction]):
+    def step(self, actions: dict[str, Union[np.ndarray, EnergyAction]]):
+        
+        
+
+        rewards = {a: 0 for a in self.agents}
+        terminations = {a: False for a in self.agents}
 
         # Perform the actions
         for agent_name, action in actions.items():
+            curr_state = self.entities[agent_name].get_current_state()
             self.entities[agent_name].step(action)
+            next_state = self.entities[agent_name].get_current_state()    
+            rewards[agent_name] = self.reward_function.calculate(curr_state, action, next_state, time_steps=self.time_step)
+            
 
-        terminations = {a: False for a in self.agents}
+
         
-        rewards = {a: 0 for a in self.agents}
-        # Get dummy infos (not used in this example)
+       
         
         
-        # Get the rewards
-        for agent in self.agents:
-            rewards[agent] = self.reward_function.calculate(self.entities[agent].get_current_state())
+        
+        # # Get the rewards
+        # for agent in self.agents:
+        #     rewards[agent] = self.reward_function.calculate(self.entities[agent].get_current_state())
         
            
         # get new observations according to the current state
@@ -216,7 +225,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
         return self.__observe_all()
     
     def __observe_all(self):
-        return {agent: self.entities[agent].get_current_state() for agent in self.agents}
+        return {agent: np.array(list(self.entities[agent].get_current_state().values()),dtype=np.float32) for agent in self.agents}
     
 
     def get_observation_space(self):

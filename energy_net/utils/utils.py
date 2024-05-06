@@ -1,6 +1,7 @@
 from scipy.integrate import quad
 from scipy.misc import derivative
 from typing import Callable, Any, TypedDict
+import numpy as np
 
 from ..model.state import State
 
@@ -62,3 +63,4 @@ def unit_conversion(dest_units: str, x: float, T: tuple[float, float]) -> float:
 
 def move_time_tick(cur_time):
     return cur_time+1
+

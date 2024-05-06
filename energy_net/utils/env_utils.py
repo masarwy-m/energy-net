@@ -15,6 +15,8 @@ from ..entities.household import Household
 from ..model.reward import RewardFunction
 
 
+
+
 def observation_seperator(observation:dict[str, np.ndarray]):
     """
     Seperates the observation into the agent's observation.
@@ -68,8 +70,8 @@ def default_network_entities() -> List[NetworkEntity]:
         return [household]
 
 
-class DefaultRewardFunction(RewardFunction):
-    r"""Dummy reward function class.
+class DefaultHouseholdRewardFunction(RewardFunction):
+    """Dummy reward function class.
 
     Parameters
     ----------
@@ -82,11 +84,16 @@ class DefaultRewardFunction(RewardFunction):
     def __init__(self, env_metadata: Mapping[str, Any], **kwargs):
         super().__init__(env_metadata, **kwargs)
 
-    def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
-        return 0
+    def calculate(self, curr_state, action, next_state, **kwargs) -> float:
+        # production = curr_state['curr_consumption'] + action.item()
+        # time_steps = kwargs.get('time_steps', None)
+        # assert time_steps is not None
+        # return  -1 * (production if time_steps  == 0 else 2 * production)
+        return -1 * action.item()
+        
 
 def default_reward(meta_data: dict[str, str])-> RewardFunction:
-    return DefaultRewardFunction(env_metadata=meta_data)
+    return DefaultHouseholdRewardFunction(env_metadata=meta_data)
 
 
 

@@ -27,6 +27,8 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
         # run `reset` as usual.
         out = self.env.reset(seed=seed,
                              options=kwargs or None)
+        
+        
        
         
 
@@ -37,9 +39,6 @@ class SingleAgentParallelEnvToGymWrapper(BaseParallelWrapper, gym.Env):
         else:
             obs = out
             infos = {k: {} for k in obs.keys()}
-
-         
-        
 
         # return the single entry value as is.
         # no need for the key (only one agent)

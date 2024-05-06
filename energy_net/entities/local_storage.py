@@ -17,6 +17,7 @@ class Battery(StorageDevice):
     def __init__(self, init_time, storage_params:StorageParams, init_state:StorageState=None):
         super().__init__(init_time, storage_params, init_state = init_state)
         self.action_type = StorageAction
+        self.current_time = init_time
 
     @property
     def current_state(self) -> StorageState:
@@ -34,6 +35,7 @@ class Battery(StorageDevice):
         self.charging_efficiency = state['charging_efficiency']
         self.discharging_efficiency = state['discharging_efficiency']
         self.current_time = state['current_time']
+        super().update_state(state)
 
 
     def get_reward(self):
@@ -41,6 +43,7 @@ class Battery(StorageDevice):
     
     def reset(self) -> StorageState:
         super().reset()
+        self.reset_time()
         return self.get_current_state()
     
     def get_action_space(self) -> Box:
@@ -51,6 +54,10 @@ class Battery(StorageDevice):
         low = np.array([MIN_CAPACITY, MIN_CAPACITY, MIN_CHARGE, MIN_EFFICIENCY, MIN_EFFICIENCY, INITIAL_TIME])
         high = np.array([MAX_CAPACITY, MAX_CAPACITY, self.energy_capacity, MAX_EFFICIENCY, MAX_EFFICIENCY, MAX_TIME])
         return Box(low=low, high=high, dtype=np.float32)
+    
+
+    def reset_time(self):
+        self.current_time = self.init_time
 
 
         

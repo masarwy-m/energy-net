@@ -62,6 +62,7 @@ class ConsumerDevice(Device):
         self.max_electric_power = state.max_electric_power
         self.efficiency = state.efficiency
         self.consumption = state.consumption
+        super().update_state(state)
 
   
     def reset(self) -> ConsumerState:
