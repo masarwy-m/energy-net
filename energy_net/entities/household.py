@@ -1,8 +1,7 @@
 from typing import Any, Union
 import numpy as np
 import random
-
-from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, MIN_POWER, PRED_CONST_DUMMY
+from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, PRED_CONST_DUMMY
 from ..defs import Bounds
 from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction, ProduceAction
 from ..model.state import State, HouseholdState, HouseholdConsumptionState
