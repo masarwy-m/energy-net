@@ -1,19 +1,16 @@
 from typing import Any, Union
 import numpy as np
+import random
 
-
-from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, PRED_CONST_DUMMY
-from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction
-from ..model.state import State, HouseholdState, HouseholdConsumptionState
+from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY, MIN_POWER, PRED_CONST_DUMMY
 from ..defs import Bounds
-from ..network_entity import CompositeNetworkEntity, ElementaryNetworkEntity
-from typing import Any, Union, List
-import numpy as np
-from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY
 from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction, ProduceAction
-from ..defs import Bounds
-from ..model.state import State
+from ..model.state import State, HouseholdState, HouseholdConsumptionState
 from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
+from ..entities.local_storage import Battery
+from ..entities.device import StorageDevice
+from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
+from ..entities.local_producer import PrivateProducer
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
@@ -21,7 +18,7 @@ class Household(CompositeNetworkEntity):
     """
     def __init__(self, name: str, consumption_params_dict:dict[str,ConsumptionParams]=None, storage_params_dict:dict[str,StorageParams]=None, production_params_dict:dict[str,ProductionParams]=None, agg_func=None):
         consumption_dict = {name: HouseholdConsumption(params) for name, params in consumption_params_dict.items()}
-        storage_dict = {name: Battery(init_time=INITIAL_TIME, storage_params=params) for name, params in storage_params_dict.items()}
+        storage_dict = {name: Battery(storage_params=params, init_time=INITIAL_TIME) for name, params in storage_params_dict.items()}
         production_dict = {name: PrivateProducer(params) for name, params in production_params_dict.items()}
         self.consumption_name_array = list(consumption_dict.keys())
         self.storage_name_array = list(storage_dict.keys())
