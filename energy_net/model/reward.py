@@ -28,7 +28,7 @@ class RewardFunction(ABC):
         self.__env_metadata = env_metadata
 
     @abstractmethod
-    def calculate(self, observations: List[Mapping[str, Union[int, float]]]) -> List[float]:
+    def calculate(self, curr_state, action, next_state, **kwargs) -> float:
         r"""Calculates reward.
 
         Parameters
