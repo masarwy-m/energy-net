@@ -12,8 +12,8 @@ from energy_net.entities.household import Household
 from energy_net.entities.params import StorageParams, ConsumptionParams, ProductionParams
 from energy_net.config import DEFAULT_LIFETIME_CONSTANT
 # Add the project's root directory to sys.path
-# from energy_net.env.single_entity_v0 import gym_env
-# from common import single_agent_cfgs
+from energy_net.env.single_entity_v0 import gym_env
+from common import single_agent_cfgs
 
 def test_household():
     with warnings.catch_warnings():
@@ -47,12 +47,13 @@ def test_household():
         household.system_step()
 
         # initialize pettingzoo environment wrapper
-        #for env_name, env_cfg in single_agent_cfgs.items():
-        #    seed = hash(env_name)
-        #    seed = abs(hash(str(seed)))
-        #    env = gym_env(**env_cfg, initial_seed=seed)
+        for env_name, env_cfg in single_agent_cfgs.items():
+            seed = hash(env_name)
+            seed = abs(hash(str(seed)))
+            env = gym_env(**env_cfg, initial_seed=seed, network_entities=[household])
 
-        #    observation, info = env.reset()
+            observation, info = env.reset()
+
         '''
         # run simulation
         for _ in range(1000):

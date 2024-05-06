@@ -1,6 +1,5 @@
 from typing import Callable, Any, TypedDict
 
-
 AmountPricePair = tuple[float, float]
 PriceList = list[AmountPricePair]
 ProductionPredFn = Callable[[Any, ...], PriceList]
@@ -13,4 +12,5 @@ class Bounds(TypedDict):
     high:Any
     dtype:Any
     shape:Any
-##################### States ######################
+
+      

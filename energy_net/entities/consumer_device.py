@@ -1,6 +1,5 @@
 
 import numpy as np
-
 from ..defs import Bounds
 from ..entities.device import Device
 from ..model.state import ConsumerState
@@ -73,7 +72,7 @@ class ConsumerDevice(Device):
 
     def get_action_space(self):
         return Bounds(low=MIN_POWER, high=self.max_electric_power, shape=(1,), dtype=np.float32)
-        
+
 
     def get_observation_space(self):
         # Define the lower and upper bounds for each dimension of the observation space

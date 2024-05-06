@@ -4,7 +4,9 @@ from pathlib import Path
 from gymnasium.utils import seeding
 from pettingzoo import ParallelEnv
 import numpy as np
+from gymnasium.spaces import Box, Dict
 
+from ..defs import Bounds
 from ..network_entity import NetworkEntity
 from ..model.action import EnergyAction
 from ..model.reward import RewardFunction
@@ -33,6 +35,7 @@ class DefaultHouseholdRewardFunction(RewardFunction):
         # assert time_steps is not None
         # return  -1 * (production if time_steps  == 0 else 2 * production)
         return -1 * action.item()
+
 
 
 class EnergyNetEnv(ParallelEnv, Environment):
@@ -79,10 +82,8 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.agents = []
         
         # set reward function
-        
-        self.reward_function = reward_function if reward_function is not None else DefaultHouseholdRewardFunction(env_metadata=self.get_metadata())
-
-
+        self.reward_function = reward_function if reward_function is not None else DefaultHouseholdRewardFunction(env_metadata=self.get_metadata)
+       
         # reset environment and initializes episode time steps
         self.reset()
 
@@ -246,7 +247,14 @@ class EnergyNetEnv(ParallelEnv, Environment):
     
     def __observe_all(self):
         return {agent: np.array(list(self.entities[agent].get_current_state().values()),dtype=np.float32) for agent in self.agents}
-    
+
+    def convert_space(self, space):
+        if isinstance(space, dict):
+            return Dict(space)
+        elif isinstance(space, Bounds):
+            return Box(low=space.low, high=space.high, shape=(1,), dtype=space.dtype)
+        else:
+            raise TypeError("observation space not supported")
 
     def get_observation_space(self):
         return {name: bounds_to_gym_box(entity.get_observation_space()) for name, entity in self.entities.items()}
@@ -254,6 +262,7 @@ class EnergyNetEnv(ParallelEnv, Environment):
 
     def get_action_space(self):
         return {name: bounds_to_gym_box(entity.get_action_space()) for name, entity in self.entities.items()}
+
     
 
     @property

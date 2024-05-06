@@ -7,12 +7,13 @@ from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeActi
 from ..model.state import State, HouseholdState, HouseholdConsumptionState
 from ..defs import Bounds
 from ..network_entity import CompositeNetworkEntity, ElementaryNetworkEntity
-from ..entities.device import StorageDevice
-from ..entities.local_storage import Battery
-from ..entities.params import StorageParams, ProductionParams, ConsumptionParams
-from ..entities.local_producer import PrivateProducer
-
-
+from typing import Any, Union, List
+import numpy as np
+from ..config import INITIAL_TIME, NO_CONSUMPTION, MAX_CONSUMPTION, NO_CHARGE, MAX_CAPACITY
+from ..model.action import EnergyAction, StorageAction, TradeAction, ConsumeAction, ProduceAction
+from ..defs import Bounds
+from ..model.state import State
+from ..network_entity import NetworkEntity, CompositeNetworkEntity, ElementaryNetworkEntity
 
 class Household(CompositeNetworkEntity):
     """ A household entity that contains a list of sub-entities. The sub-entities are the devices and the household itself is the composite entity.
@@ -27,15 +28,13 @@ class Household(CompositeNetworkEntity):
         self.production_name_array = list(production_dict.keys())
         sub_entities = {**consumption_dict, **storage_dict, **production_dict}
         super().__init__(name=name, sub_entities=sub_entities, agg_func=agg_func)
-
-        
+      
         inital_soc = sum(s.state['state_of_charge'] for s in self.get_storage_devices().values())
         
         self._init_state = HouseholdState(storage=inital_soc, curr_consumption=NO_CONSUMPTION, pred_consumption=self.get_next_consumption())
         self._state = self.reset()
         
-        
-
+  
 
     def step(self, action: StorageAction):
         
@@ -59,15 +58,16 @@ class Household(CompositeNetworkEntity):
         [cur_price_sell, cur_price_buy] = self.get_current_market_price()
 
         # get storage/trade policy
-        curr_storage = []
+        cur_storage = []
         for storage_name in self.storage_name_array:
-            charge_value = self.get_action_space()[storage_name].sample()
+            charge_range = self.get_action_space()[storage_name]
+            charge_value = random.uniform(charge_range['low'],charge_range['high'])
             charge_action = StorageAction(charge=charge_value)
             # execute policy
             new_state=self.sub_entities[storage_name].step(charge_action)
-            curr_storage.append(new_state['state_of_charge'])
+            cur_storage.append(new_state['state_of_charge'])
             # update storage
-        self.state['storage'] = sum(curr_storage)
+        self.state['storage'] = sum(cur_storage)
 
         # buy/sell surplus
         trade_amount = cur_comsumption
@@ -75,6 +75,7 @@ class Household(CompositeNetworkEntity):
 
 
     def get_current_market_price(self):
+        # todo: remove
         return [8,8]
 
     def predict(self, actions: Union[np.ndarray, dict[str, Any]]):
@@ -107,20 +108,17 @@ class Household(CompositeNetworkEntity):
         low = np.array([NO_CHARGE, NO_CONSUMPTION, NO_CONSUMPTION])
         high = np.array([MAX_CAPACITY, MAX_CONSUMPTION, MAX_CONSUMPTION])
         return Bounds(low=low, high=high, shape=(len(low),) ,dtype=np.float32)
-        
 
     def get_action_space(self) -> Bounds:
         storage_devices_action_sapces = [v.get_action_space() for v in self.get_storage_devices().values()]
         
         # Combine the Bounds objects into a single Bound object
-        # print(np.array([bound['low'] for bound in storage_devices_action_sapces]), "BBB")
-        # combined_low = np.concatenate([bound['low'] for bound in storage_devices_action_sapces])
-        # combined_high = np.concatenate([bound['high'] for bound in storage_devices_action_sapces])
-        
         combined_low = np.array([bound['low'] for bound in storage_devices_action_sapces])
         combined_high = np.array([bound['high'] for bound in storage_devices_action_sapces])
         return Bounds(low=combined_low, high=combined_high, shape=(len(combined_low),),  dtype=np.float32)
+
         
+
     def reset(self) -> HouseholdState:
         # return self.apply_func_to_sub_entities(lambda entity: entity.reset())
         self._state = self._init_state
@@ -158,7 +156,6 @@ class HouseholdConsumption(ElementaryNetworkEntity):
 
     def predict_next_consumption(self, param: ConsumptionParams = None) -> float:
         return PRED_CONST_DUMMY
-        # return self.energy_dynamics.predict(state)
 
     def step(self, action: ConsumeAction):
         # Update the state with the current consumption
@@ -169,3 +166,12 @@ class HouseholdConsumption(ElementaryNetworkEntity):
     
     def get_current_state(self):
         return self._state
+
+    def get_observation_space(self):
+        low = NO_CONSUMPTION
+        high = np.inf
+        return Bounds(low=low, high=high, dtype=np.float32)
+
+    def get_action_space(self):
+        return Bounds(low=MIN_POWER, high=self.max_electric_power, dtype=np.float32)
+

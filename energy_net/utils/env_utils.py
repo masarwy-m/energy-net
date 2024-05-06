@@ -2,6 +2,7 @@
 import numpy as np
 from gymnasium.spaces import Box
 from typing import List, Mapping, Any, Union
+import time
 
 from ..defs import Bounds
 from ..config import DEFAULT_EFFICIENCY, DEFAULT_LIFETIME_CONSTANT
@@ -35,21 +36,40 @@ def observation_seperator(observation:dict[str, np.ndarray]):
 
 
 def bounds_to_gym_box(bounds: Bounds) -> Box:
-    """
-    Converts a Bounds object to a gym.Box object.
-
-    Args:
-        bounds (Bounds): The Bounds object to be converted.
-
-    Returns:
-        gym.Box: The corresponding gym.Box object.
-    """
-    return Box(
+  return Box(
         low=bounds['low'],
         high=bounds['high'],
         shape=bounds['shape'],
         dtype=bounds['dtype']
     )
+
+
+def default_household():
+    # initialize consumer devices
+        consumption_params_arr=[]
+        consumption_params = ConsumptionParams(name='household_consumption', energy_dynamics=HouseholdConsumptionDynamics(), lifetime_constant=DEFAULT_LIFETIME_CONSTANT)
+        consumption_params_arr.append(consumption_params)
+        consumption_params_dict = {'household_consumption': consumption_params}
+
+        # initialize storage devices
+        storage_params_arr=[]
+        storage_params = StorageParams(name = 'test_battery', energy_capacity = 100, power_capacity = 200,inital_charge = 50, charging_efficiency = 1,discharging_efficiency = 1, lifetime_constant = 15, energy_dynamics = BatteryDynamics())
+        storage_params_arr.append(storage_params)
+        storage_params_dict = {'test_battery': storage_params}
+
+        # initialize production devices
+        production_params_arr=[]
+        production_params = ProductionParams(name='test_pv', max_production=100, efficiency=0.9, energy_dynamics=PVDynamics())
+        production_params_arr.append(production_params)
+        production_params_dict = {'test_pv': production_params}
+
+        # initilaize household
+        return Household(name="test_household", consumption_params_dict=consumption_params_dict, storage_params_dict=storage_params_dict, production_params_dict=production_params_dict, agg_func= None)
+
+
+def default_network_entities() -> List[NetworkEntity]:
+        household = default_household()
+        return [household]
 
 
 

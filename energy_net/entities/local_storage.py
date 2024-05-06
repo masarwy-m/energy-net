@@ -13,8 +13,8 @@ from ..model.state import StorageState
 class Battery(StorageDevice):
     """Base electricity storage class.
     """
-    def __init__(self, init_time, storage_params:StorageParams, init_state:StorageState=None):
-        super().__init__(init_time, storage_params, init_state = init_state)
+    def __init__(self, storage_params:StorageParams, init_state:StorageState=None, init_time=None):
+        super().__init__(storage_params, init_state = init_state, init_time=init_time)
         self.action_type = StorageAction
         self.current_time = init_time
 
@@ -54,7 +54,6 @@ class Battery(StorageDevice):
         high = np.array([MAX_CAPACITY, MAX_CAPACITY, self.energy_capacity, MAX_EFFICIENCY, MAX_EFFICIENCY, MAX_TIME])
         return Bounds(low=low, high=high,shape=(len(low),),  dtype=np.float32)
     
-
     def reset_time(self):
         self.current_time = self.init_time
 
