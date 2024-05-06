@@ -72,7 +72,7 @@ class PrivateProducer(Device):
         self.max_production = self.init_max_production
         return self.get_current_state()
 
-      def get_action_space(self) -> Bounds:
+    def get_action_space(self) -> Bounds:
         return Bounds(low=MIN_POWER, high=self.max_production, shape=(1,), dtype=np.float32)
 
     def get_observation_space(self) -> Bounds :
