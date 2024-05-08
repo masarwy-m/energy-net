@@ -110,7 +110,6 @@ class EnergyNetEnv(ParallelEnv, Environment):
         if seed is not None:
             self.seed(seed)
 
-        
 
         # reset agents
         self.agents = self.possible_agents.copy()
@@ -135,19 +134,17 @@ class EnergyNetEnv(ParallelEnv, Environment):
         self.__np_random, seed = seeding.np_random(seed)
 
 
-    def step(self, actions: dict[str, Union[np.ndarray, EnergyAction]]):
-        
-        
+    def step(self, joint_action: dict[str, Union[np.ndarray, EnergyAction]]):
 
         rewards = {a: 0 for a in self.agents}
         terminations = {a: False for a in self.agents}
 
         # Perform the actions
-        for agent_name, action in actions.items():
+        for agent_name, actions in joint_action.items():
             curr_state = self.entities[agent_name].get_current_state()
-            self.entities[agent_name].step(action)
+            self.entities[agent_name].step(actions)
             next_state = self.entities[agent_name].get_current_state()    
-            rewards[agent_name] = self.reward_function.calculate(curr_state, action, next_state, time_steps=self.time_step)
+            rewards[agent_name] = self.reward_function.calculate(curr_state, actions, next_state, time_steps=self.time_step)
             
 
 
