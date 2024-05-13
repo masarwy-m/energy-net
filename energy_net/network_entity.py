@@ -26,7 +26,7 @@ class NetworkEntity:
         self.name = name
 
     @abstractmethod
-    def step(self, action: EnergyAction):
+    def step(self, actions: dict[str, Union[np.ndarray,EnergyAction]]):
         """
         Perform the given action and return the new state and reward.
 
@@ -52,6 +52,10 @@ class NetworkEntity:
         """
         pass
 
+    @abstractmethod
+    def system_step(self):
+        pass
+
 
 class CompositeNetworkEntity(NetworkEntity):
     """ 
@@ -65,7 +69,6 @@ class CompositeNetworkEntity(NetworkEntity):
         self.agg_func = agg_func
 
     def step(self, actions: dict[str, Union[np.ndarray,EnergyAction]]):
-
         states = {}
         for entity_name, action in actions.items():
             if type(action) is np.ndarray:
@@ -99,6 +102,13 @@ class CompositeNetworkEntity(NetworkEntity):
         else:
             return predicted_states
 
+    def get_joint_action(self)->dict[str, EnergyAction]:
+        pass
+
+    def apply_joint_action(self, joint_action:dict[str, EnergyAction]):
+            for entity in joint_action:
+                # get entity and apply the action
+                self.sub_entities[entity].step(joint_action[entity])
 
 class ElementaryNetworkEntity(NetworkEntity):
     """

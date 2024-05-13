@@ -40,19 +40,19 @@ def test_household():
         # initilaize household
         household = Household(name="test_household", consumption_params_dict=consumption_params_dict, storage_params_dict=storage_params_dict, production_params_dict=production_params_dict, agg_func= None)
 
-        # perform test action
-        household.step({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=None), 'test_pv': ProduceAction(produce=None)})
+        # check individual actions
+        household.perform_joint_action({'test_battery':StorageAction(charge=10), 'household_consumption': ConsumeAction(consume=None), 'test_pv': ProduceAction(produce=None)})
 
         # perform system step
-        household.system_step()
+        #household.system_step()
 
         # initialize pettingzoo environment wrapper
-        for env_name, env_cfg in single_agent_cfgs.items():
-            seed = hash(env_name)
-            seed = abs(hash(str(seed)))
-            env = gym_env(**env_cfg, initial_seed=seed, network_entities=[household])
+        #for env_name, env_cfg in single_agent_cfgs.items():
+        #    seed = hash(env_name)
+        #    seed = abs(hash(str(seed)))
+        #    env = gym_env(**env_cfg, initial_seed=seed, network_entities=[household])
 
-            observation, info = env.reset()
+        #    observation, info = env.reset()
 
         '''
         # run simulation
