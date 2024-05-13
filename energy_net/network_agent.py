@@ -35,26 +35,6 @@ class NetworkAgent(ABC):
         pass
 
 
-# class RewardLogger(BaseCallback):
-#     """
-#     A custom callback to log the rewards during training and evaluation.
-#     """
-
-#     def __init__(self, verbose=0):
-#         super(RewardLogger, self).__init__(verbose)
-#         self.train_rewards = []
-#         self.eval_rewards = []
-
-#     def _on_step(self) -> bool:
-#         return True
-
-#     def _on_rollout_end(self):
-#         self.train_rewards.append(self.locals["episode_rewards"][-1])
-
-#     def _on_evaluation_end(self, locals_, globals_):
-#         self.eval_rewards.append(locals_["eval_rewards"][-1])
-
-
 class SACAgent(NetworkAgent):
     """
     Soft Actor-Critic (SAC) agent using Stable Baselines.
@@ -146,6 +126,20 @@ class RandomAgent(NetworkAgent):
             if done:
                 observation, info = self.env.reset()
         return np.mean(self.eval_rewards)
+    
+    def choose_action(self, observation=None, deterministic=False):
+        """
+        Choose an action based on the given observation.
+
+        Args:
+            observation (np.ndarray): The observation from the environment.
+            deterministic (bool): Whether to choose the action deterministically or stochastically.
+
+        Returns:
+            np.ndarray: The chosen action.
+        """
+        
+        return self.env.action_space.sample()
                 
 
     def plot(self):
