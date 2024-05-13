@@ -12,6 +12,7 @@ from stable_baselines3.common.noise import NormalActionNoise
 from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.results_plotter import plot_results, ts2xy, load_results
 from stable_baselines3.common.monitor import Monitor
+from stable_baselines3.common import results_plotter
 
 
 
@@ -228,7 +229,7 @@ class TD3Agent(NetworkAgent):
         self.eval_rewards = []
         self.train_rewards = []
 
-    def train(self, total_timesteps=10000, log_interval=10, eval_freq=1000, eval_episodes=5, **kwargs):
+    def train(self, total_timesteps=10000, log_interval=10, eval_freq=1000, progress_bar=True, eval_episodes=5, **kwargs):
         os.makedirs(self.log_dir, exist_ok=True)
         env = Monitor(self.env, self.log_dir)
 
@@ -238,7 +239,7 @@ class TD3Agent(NetworkAgent):
         self.eval_callback = EvalCallback(env, log_path=self.log_dir, eval_freq=1000, best_model_save_path=self.log_dir)
 
         self.model = TD3(self.policy, env, action_noise=action_noise, verbose=self.verbose, **kwargs)
-        self.model.learn(total_timesteps=total_timesteps, log_interval=log_interval,
+        self.model.learn(total_timesteps=total_timesteps, progress_bar=progress_bar, log_interval=log_interval,
                          callback=self.eval_callback)
 
     def eval(self, n_episodes=5):
@@ -250,7 +251,8 @@ class TD3Agent(NetworkAgent):
         self.eval_rewards.append(locals_['eval_rewards'][-1])
 
     def plot(self):
-        plot_results([self.log_dir], 1e5, "TD3 Agent")
+        results_plotter.plot_results(
+            [self.log_dir], 1e5, results_plotter.X_TIMESTEPS, "TD3 LunarLander")
 
 
 def moving_average(values, window):
