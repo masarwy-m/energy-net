@@ -3,7 +3,9 @@ from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.callbacks import BaseCallback
+from stable_baselines3.common.monitor import Monitor
 import numpy as np
+import os
 import matplotlib.pyplot as plt
 
 class NetworkAgent(ABC):
@@ -59,7 +61,9 @@ class SACAgent(NetworkAgent):
     """
 
     def __init__(self, env, policy, log_dir = './logs/', verbose=1):
-        self.env = env
+        self.log_dir = log_dir
+        os.makedirs(log_dir, exist_ok=True)
+        self.env = Monitor(env, log_dir)
         self.unwrapped = env
         self.policy = policy
         self.verbose = verbose
@@ -68,17 +72,14 @@ class SACAgent(NetworkAgent):
         self.eval_rewards = []
         self.train_rewards = []
         self.log_dir = log_dir
+        os.makedirs(log_dir, exist_ok=True)
 
-    def train(self, total_timesteps=10000, log_interval=10, eval_freq=1, progress_bar=True, **kwargs):
-        # self.eval_callback = EvalCallback(self.env, best_model_save_path='./logs/',
-        #                                   log_path='./logs/', eval_freq=eval_freq,
-        #                                   deterministic=True, render=False,
-        #                                   callback_after_eval=RewardLogger())
-        self.eval_callback = EvalCallback(self.env, log_path=self.log_dir, eval_freq=1000, best_model_save_path=self.log_dir)
+    def train(self, total_timesteps=10000, log_interval=10, eval_freq=1000, progress_bar=True, **kwargs):
+        self.eval_callback = EvalCallback(self.env, log_path=self.log_dir, eval_freq=eval_freq, best_model_save_path=self.log_dir)
 
         self.model = SAC(self.policy, self.env, verbose=self.verbose, **kwargs)
         self.env = self.model.env
-        self.model.learn(total_timesteps=total_timesteps, progress_bar=True, log_interval=log_interval,
+        self.model.learn(total_timesteps=total_timesteps, progress_bar=progress_bar, log_interval=log_interval,
                          callback=self.eval_callback)
 
     def eval(self, n_episodes=5):
@@ -107,8 +108,6 @@ class SACAgent(NetworkAgent):
         self.eval_rewards.append(locals_['eval_rewards'][-1])
 
     def plot(self):
-        print(self.train_rewards)
-        print(self.eval_rewards)
         plt.figure(figsize=(10, 6))
         plt.plot(self.train_rewards, label='Training Rewards')
         plt.plot(self.eval_rewards, label='Evaluation Rewards')
