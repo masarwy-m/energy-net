@@ -80,6 +80,20 @@ class SACAgent(NetworkAgent):
     def eval(self, n_episodes=5):
         rewards, _ = evaluate_policy(self.model, self.env, n_eval_episodes=n_episodes, deterministic=True, render=False)
         return np.mean(rewards)
+    
+    
+    def choose_action(self, observation, deterministic=False):
+        """
+        Choose an action based on the given observation.
+
+        Args:
+            observation (np.ndarray): The observation from the environment.
+            deterministic (bool): Whether to choose the action deterministically or stochastically.
+
+        Returns:
+            np.ndarray: The chosen action.
+        """
+        return self.model.predict(observation, deterministic=deterministic)[0]
 
     def _log_rewards(self, locals_, globals_):
         self.train_rewards.append(locals_['episode_rewards'][-1])
