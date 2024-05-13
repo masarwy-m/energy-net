@@ -1,10 +1,12 @@
 from abc import ABC, abstractmethod
+from energy_net.utils.utils import plot_data
 from stable_baselines3 import SAC
 from stable_baselines3.common.callbacks import EvalCallback, CheckpointCallback
 from stable_baselines3.common.evaluation import evaluate_policy
 from stable_baselines3.common.callbacks import BaseCallback
 import numpy as np
-import matplotlib.pyplot as plt
+
+
 
 class NetworkAgent(ABC):
     """
@@ -74,6 +76,7 @@ class SACAgent(NetworkAgent):
                                           callback_after_eval=RewardLogger())
 
         self.model = SAC(self.policy, self.env, verbose=self.verbose, **kwargs)
+        self.env = self.model.get_env()
         self.model.learn(total_timesteps=total_timesteps, progress_bar=True, log_interval=log_interval,
                          callback=self.eval_callback)
 
@@ -108,3 +111,45 @@ class SACAgent(NetworkAgent):
         plt.title('Training and Evaluation Rewards')
         plt.legend()
         plt.show()
+
+
+
+class RandomAgent(NetworkAgent):
+    """
+    A random agent that takes random actions in the environment.
+    """
+
+    def __init__(self, env):
+        self.env = env
+        self.train_rewards = []
+        self.eval_rewards = []
+        self.soc = []
+        self.action = []
+
+    def train(self, total_timesteps=1000):
+        pass
+
+    def eval(self, n_episodes=100):
+        observation = self.env.reset()[0]
+        for _ in range(n_episodes):
+            self.soc.append(observation[0])
+            action = self.env.action_space.sample()
+            self.action.append(action.item())
+            observation, reward, done, _, info = self.env.step(action)
+            self.eval_rewards.append(reward)
+
+
+            if done:
+                observation, info = self.env.reset()
+        return np.mean(self.eval_rewards)
+                
+
+    def plot(self):
+
+        plot_data(self.eval_rewards, 'Rewards')
+
+        # Plot actions
+        plot_data(self.action, 'Actions')
+
+        # Plot soc
+        plot_data(self.soc, 'State of Charge (SoC)')
