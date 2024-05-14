@@ -2,6 +2,7 @@ from scipy.integrate import quad
 from scipy.misc import derivative
 from typing import Callable, Any, TypedDict
 import numpy as np
+import matplotlib.pyplot as plt
 
 from ..model.state import State
 
@@ -64,3 +65,27 @@ def unit_conversion(dest_units: str, x: float, T: tuple[float, float]) -> float:
 def move_time_tick(cur_time):
     return cur_time+1
 
+def plot_data(data, title):
+    """
+    Plots the given data against the step number.
+
+    Args:
+        data (list): A list containing the data to be plotted.
+        title (str): The title for the plot.
+    """
+    # Create a list of steps
+    steps = list(range(len(data)))
+
+    # Create a new figure
+    plt.figure(figsize=(8, 6))
+
+    # Plot the data
+    plt.plot(steps, data)
+
+    # Add title and labels
+    plt.title(title)
+    plt.xlabel('Steps')
+    plt.ylabel(title)
+
+    # Show the plot
+    plt.show()
