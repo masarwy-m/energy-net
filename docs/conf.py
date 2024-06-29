@@ -3,11 +3,11 @@
 
 # -- Project information -----------------------------------------------------
 
-project = 'Energy-Net'
-author = 'Your Name'
-copyright = 'Copyright © Your Company'
-version = '1.0'
-release = '1.0.0'
+project = 'energy-net'
+author = 'CLAIR'
+copyright = 'Copyright © CLAIR'
+version = '0.0.1'
+release = '0.0.1'
 
 # -- General configuration ---------------------------------------------------
 
@@ -28,4 +28,3 @@ master_doc = 'index'
 # -- Options for HTML output -------------------------------------------------
 
 html_theme = 'sphinx_rtd_theme'
-
