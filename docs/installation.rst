@@ -15,5 +15,3 @@ To install Energy-Net, follow these steps:
    .. code-block:: bash
 
       pip install -r requirements.txt
-
-4. Additional setup instructions (if any).
