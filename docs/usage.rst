@@ -21,4 +21,3 @@ Here's how to get started with Energy-Net:
 
       sim.run()
 
-Replace the above pseudo code with actual usage examples relevant to your project.
