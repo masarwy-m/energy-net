@@ -1,23 +1,44 @@
 Usage
 =====
 
-Here's how to get started with Energy-Net:
-
-1. Importing the module:
+Here's a simple Python script that initializes your EnergyNetEnv environment
 
    .. code-block:: python
 
-      from energy_net import Simulator
+      def main():
+		# Initialize the environment
+		env = EnergyNetEnv()
 
-2. Create a simulation instance:
+		# Reset the environment; typically returns the initial observation
+		observations = env.reset()
+		print("Initial Observations:", observations)
 
-   .. code-block:: python
+		# Loop over agents in the environment
+		for agent in env.agent_iter():
+			# Obtain the observation, reward, done status, and additional info for this agent
+			observation, reward, done, info = env.last()
+			print(f"Agent: {agent}, Observation: {observation}, Reward: {reward}, Done: {done}")
 
-      sim = Simulator()
+			# If the agent's episode is over, pass an empty dict as the action
+			if done:
+				action = None
+			else:
+				# Otherwise, choose a sample action from the action space
+				# This is a simplified example assuming discrete action spaces
+				action = env.action_spaces[agent].sample()
 
-3. Run a simulation:
+			# Step the environment forward by providing the action
+			env.step(action)
 
-   .. code-block:: python
+			# Optionally break the loop if all agents are done
+			if all(env.dones.values()):
+				break
 
-      sim.run()
+		# Close the environment properly
+		env.close()
+
+	  if __name__ == "__main__":
+		main()
+
+
 

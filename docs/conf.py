@@ -6,8 +6,8 @@
 project = 'energy-net'
 author = 'CLAIR'
 copyright = 'Copyright © CLAIR'
-version = '0.0.2'
-release = '0.0.2'
+version = '0.0.3'
+release = '0.0.3'
 
 # -- General configuration ---------------------------------------------------
 
