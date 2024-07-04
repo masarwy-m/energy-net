@@ -6,8 +6,8 @@ Energy-Net is designed to simulate and analyze energy networks efficiently.
 .. image:: /_static/EnergyNetUML.png
    :alt: Energy-Net UML Diagram
    :align: center
-   :height: 800px
-   :width: 1200px
+   :height: 600px
+   :width: 421px
 
 Contents:
 
